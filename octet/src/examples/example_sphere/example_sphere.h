@@ -19,7 +19,7 @@ namespace octet {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
 
-      material *red = new material(vec4(1, 0, 0, 1));
+      material *red = new material(vec4(1, 1, 1, 1));
       mesh_sphere *sphere = new mesh_sphere(vec3(0), 8, 4);
       sphere->make_wireframe();
 
