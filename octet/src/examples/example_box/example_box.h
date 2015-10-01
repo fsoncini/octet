@@ -20,11 +20,22 @@ namespace octet {
       app_scene->create_default_camera_and_lights();
 
       material *red = new material(vec4(1, 1, 0, 1));
+	  material *blue = new material(vec4(68.0f/256, 14.0f/256, 232.0f/256, 1));
+
       mesh *box = new mesh_box(vec3(4));
+	  mesh *box = new mesh_box(vec3(4));
       scene_node *node = new scene_node();
+	  scene_node *node2 = new scene_node();
       app_scene->add_child(node);
+	  app_scene->add_child(node2);
+	  
+
       app_scene->add_mesh_instance(new mesh_instance(node, box, red));
-    }
+	  app_scene->add_mesh_instance(new mesh_instance(node2, box, blue));
+
+
+	
+	}
 
     /// this is called to draw the world
     void draw_world(int x, int y, int w, int h) {
@@ -40,8 +51,11 @@ namespace octet {
 
       // tumble the box  (there is only one mesh instance)
       scene_node *node = app_scene->get_mesh_instance(0)->get_node();
+	  scene_node *node2 = app_scene->get_mesh_instance(0)->get_node();
       node->rotate(1, vec3(1, 0, 0));
       node->rotate(1, vec3(0, 1, 0));
+	  node2->rotate(1, vec3(1, 0, 0));
+	  node2->rotate(1, vec3(0, 1, 0));
     }
   };
 }
