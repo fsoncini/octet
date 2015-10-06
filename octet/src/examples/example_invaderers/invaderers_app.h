@@ -102,7 +102,6 @@ namespace octet {
     void translate(float x, float y) {
       modelToWorld.translate(x, y, 0);
     }
-
     // position the object relative to another.
     void set_relative(sprite &rhs, float x, float y) {
       modelToWorld = rhs.modelToWorld;
