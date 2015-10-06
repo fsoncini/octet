@@ -23,9 +23,9 @@ namespace octet {
 	  material *blue = new material(vec4(68.0f/256, 14.0f/256, 232.0f/256, 1));
 
       mesh *box = new mesh_box(vec3(4));
-	  mesh *box = new mesh_box(vec3(4));
       scene_node *node = new scene_node();
 	  scene_node *node2 = new scene_node();
+	  node2->translate(vec3(8, 0, 0));
       app_scene->add_child(node);
 	  app_scene->add_child(node2);
 	  
