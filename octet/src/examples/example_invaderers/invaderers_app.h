@@ -236,22 +236,34 @@ namespace octet {
     }
 
     // use the keyboard to move the ship
-    void move_ship() {
-      const float ship_speed = 0.05f;
-      // left and right arrows
-      if (is_key_down(key_left)) {
-        sprites[ship_sprite].translate(-ship_speed, 0);
-        if (sprites[ship_sprite].collides_with(sprites[first_border_sprite+2])) {
-          sprites[ship_sprite].translate(+ship_speed, 0);
-        }
-      } else if (is_key_down(key_right)) {
-        sprites[ship_sprite].translate(+ship_speed, 0);
-        if (sprites[ship_sprite].collides_with(sprites[first_border_sprite+3])) {
-          sprites[ship_sprite].translate(-ship_speed, 0);
-        }
-      }
-    }
+	void move_ship() {
+		const float ship_speed = 0.05f;
+		// left and right arrows
+		if (is_key_down(key_left)) {
+			sprites[ship_sprite].translate(-ship_speed, 0);
+			if (sprites[ship_sprite].collides_with(sprites[first_border_sprite + 2])) {
+				sprites[ship_sprite].translate(+ship_speed, 0);
+			}
+		}
+		else if (is_key_down(key_right)) {
+			sprites[ship_sprite].translate(+ship_speed, 0);
+			if (sprites[ship_sprite].collides_with(sprites[first_border_sprite + 3])) {
+				sprites[ship_sprite].translate(-ship_speed, 0);
+			}
+		}
+		else if (is_key_down(key_up)) {
+			sprites[ship_sprite].translate(0, +ship_speed);
+		}
 
+		else if (is_key_down(key_down)) {
+			sprites[ship_sprite].translate(0, -ship_speed);
+		}
+
+	}
+
+
+
+	
     // fire button (space)
     void fire_missiles() {
       if (missiles_disabled) {
@@ -473,7 +485,7 @@ namespace octet {
       bombs_disabled = 50;
       invader_velocity = 0.01f;
       live_invaderers = num_invaderers;
-      num_lives = 3;
+      num_lives = 10;
       game_over = false;
       score = 0;
     }
@@ -511,7 +523,7 @@ namespace octet {
       glViewport(x, y, w, h);
 
       // clear the background to black
-      glClearColor(0, 0, 0, 1);
+      glClearColor(0, 0, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // don't allow Z buffer depth testing (closer objects are always drawn in front of far ones)
