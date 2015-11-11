@@ -205,7 +205,71 @@ namespace octet {
     // information for our text
     bitmap_font font;
 
+	//Declare arrays and global variables, used in reading and implementing Csv file
+	static const int map_width = 20;
+	static const int map_height = 20;
+	int map[map_height][map_width];
+
+	dynarray<sprite> map_sprite_background;
+		
     ALuint get_sound_source() { return sources[cur_source++ % num_sound_sources]; }
+
+	//called to read a CSV file for the background and borders map
+	void read_csv() {
+
+		std::ifstream file("background.csv");
+
+		char buffer[2048];
+		int i = 0;
+
+		while (!file.eof()) {
+			file.getline(buffer, sizeof(buffer));
+
+			char *b = buffer;
+			for (int j = 0;; ++j) {
+				char *e = b;
+				while (*e != 0 && *e != ';') ++e;
+
+				map[i][j] = std::atoi(b);
+
+				if (*e != ';') break;
+				b = e + 1;
+			}
+			++i;
+		}
+	}
+
+	//Called to initialize the background and borders maps from the CSV file
+	void setup_visual_map() {
+
+		GLuint bush = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/tile_tree.gif");
+		//GLuint dirt = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/tile_dirt.gif");
+
+		for (int i = 0; i < map_height; ++i) {
+			for (int j = 0; j < map_width; ++j) {
+
+				sprite s;
+
+				if (map[i][j] == 1) {
+
+					s.init(bush, -3 + 0.15f + 0.3f*j, 3 - 0.15f - 0.3f*i, 0.3f, 0.3f);
+					map_sprite_background.push_back(s);
+					//num_bush++;
+				}
+				//else if (map[i][j] == 0) {
+					//s.init(dirt, -3 + 0.15f + 0.3f*j, 3 - 0.15f - 0.3f*i, 0.3f, 0.3f);
+					//map_sprites_dirt.push_back(s);
+
+				//}
+
+
+
+			}
+		}
+	}
+
+
+
 
     // called when we hit an enemy
     void on_hit_invaderer() {
@@ -222,6 +286,7 @@ namespace octet {
         sprites[game_over_sprite].translate(-20, 0);
       }
     }
+
 
     // called when we are hit
     void on_hit_ship() {
@@ -451,12 +516,12 @@ namespace octet {
         }
       }
 
-      // set the border to white for clarity
-      GLuint white = resource_dict::get_texture_handle(GL_RGB, "#ffffff");
-      sprites[first_border_sprite+0].init(white, 0, -3, 6, 0.2f);
-      sprites[first_border_sprite+1].init(white, 0,  3, 6, 0.2f);
-      sprites[first_border_sprite+2].init(white, -3, 0, 0.2f, 6);
-      sprites[first_border_sprite+3].init(white, 3,  0, 0.2f, 6);
+      //// set the border to white for clarity
+      //GLuint white = resource_dict::get_texture_handle(GL_RGB, "#ffffff");
+      //sprites[first_border_sprite+0].init(white, 0, -3, 6, 0.2f);
+      //sprites[first_border_sprite+1].init(white, 0,  3, 6, 0.2f);
+      //sprites[first_border_sprite+2].init(white, -3, 0, 0.2f, 6);
+      //sprites[first_border_sprite+3].init(white, 3,  0, 0.2f, 6);
 
       // use the missile texture
       GLuint missile = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile.gif");
@@ -521,9 +586,13 @@ namespace octet {
 
       // set a viewport - includes whole window area
       glViewport(x, y, w, h);
+	  //added 
+	  int screen_width = 0;
+	  int screen_height = 0;
+	  get_viewport_size(screen_width, screen_height);
 
       // clear the background to black
-      glClearColor(0, 0, 1, 1);
+      glClearColor(0, 0, 0, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // don't allow Z buffer depth testing (closer objects are always drawn in front of far ones)
@@ -532,6 +601,11 @@ namespace octet {
       // allow alpha blend (transparency when alpha channel is 0)
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	  //draw the map sprites (border)
+	  for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+		  map_sprite_background[i].render(texture_shader_, cameraToWorld);
+	  }
 
       // draw all the sprites
       for (int i = 0; i != num_sprites; ++i) {
