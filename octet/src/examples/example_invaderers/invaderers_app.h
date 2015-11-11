@@ -228,11 +228,11 @@ namespace octet {
 			char *b = buffer;
 			for (int j = 0;; ++j) {
 				char *e = b;
-				while (*e != 0 && *e != ';') ++e;
+				while (*e != 0 && *e != ',') ++e;
 
 				map[i][j] = std::atoi(b);
 
-				if (*e != ';') break;
+				if (*e != ',') break;
 				b = e + 1;
 			}
 			++i;
@@ -242,7 +242,7 @@ namespace octet {
 	//Called to initialize the background and borders maps from the CSV file
 	void setup_visual_map() {
 
-		GLuint bush = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/tile_tree.gif");
+		GLuint bush = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass.gif");
 		//GLuint dirt = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/tile_dirt.gif");
 
 		for (int i = 0; i < map_height; ++i) {
@@ -301,6 +301,7 @@ namespace octet {
     }
 
     // use the keyboard to move the ship
+	//change collision for new border on
 	void move_ship() {
 		const float ship_speed = 0.05f;
 		// left and right arrows
@@ -494,6 +495,12 @@ namespace octet {
       // set up the shader
       texture_shader_.init();
 
+	  //read the Csv
+	  read_csv();
+
+	  //initializes background borders 
+	  setup_visual_map();
+
       // set up the matrices with a camera 5 units from the origin
       cameraToWorld.loadIdentity();
       cameraToWorld.translate(0, 0, 3);
@@ -516,12 +523,12 @@ namespace octet {
         }
       }
 
-      //// set the border to white for clarity
-      //GLuint white = resource_dict::get_texture_handle(GL_RGB, "#ffffff");
-      //sprites[first_border_sprite+0].init(white, 0, -3, 6, 0.2f);
-      //sprites[first_border_sprite+1].init(white, 0,  3, 6, 0.2f);
-      //sprites[first_border_sprite+2].init(white, -3, 0, 0.2f, 6);
-      //sprites[first_border_sprite+3].init(white, 3,  0, 0.2f, 6);
+      // set the border to white for clarity
+    /*  GLuint white = resource_dict::get_texture_handle(GL_RGB, "#ffffff");
+      sprites[first_border_sprite+0].init(white, 0, -3, 6, 0.2f);
+      sprites[first_border_sprite+1].init(white, 0,  3, 6, 0.2f);
+      sprites[first_border_sprite+2].init(white, -3, 0, 0.2f, 6);
+      sprites[first_border_sprite+3].init(white, 3,  0, 0.2f, 6);*/
 
       // use the missile texture
       GLuint missile = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile.gif");
@@ -573,11 +580,18 @@ namespace octet {
 
       move_invaders(invader_velocity, 0);
 
-      sprite &border = sprites[first_border_sprite+(invader_velocity < 0 ? 2 : 3)];
-      if (invaders_collide(border)) {
-        invader_velocity = -invader_velocity;
-        move_invaders(invader_velocity, -0.1f);
-      }
+	  for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
+
+		  sprite &border = map_sprite_background[i];
+		  if (invaders_collide(border)) {
+			  invader_velocity = -invader_velocity;
+			  move_invaders(invader_velocity, -0.1f);
+		  }
+
+
+	  }
+
+    
     }
 
     // this is called to draw the world
