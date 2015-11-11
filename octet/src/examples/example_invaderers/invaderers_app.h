@@ -305,6 +305,8 @@ namespace octet {
 	void move_ship() {
 		const float ship_speed = 0.05f;
 		// left and right arrows
+		
+		
 		if (is_key_down(key_left)) {
 			sprites[ship_sprite].translate(-ship_speed, 0);
 			if (sprites[ship_sprite].collides_with(sprites[first_border_sprite + 2])) {
