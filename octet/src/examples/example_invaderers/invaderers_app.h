@@ -309,10 +309,15 @@ namespace octet {
 		
 		if (is_key_down(key_left)) {
 			sprites[ship_sprite].translate(-ship_speed, 0);
-			if (sprites[ship_sprite].collides_with(sprites[first_border_sprite + 2])) {
-				sprites[ship_sprite].translate(+ship_speed, 0);
+
+			for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
+				
+				if (sprites[ship_sprite].collides_with(map_sprite_background[i])){
+					sprites[ship_sprite].translate(+ship_speed, 0);
+				}
 			}
 		}
+	
 		else if (is_key_down(key_right)) {
 			sprites[ship_sprite].translate(+ship_speed, 0);
 			if (sprites[ship_sprite].collides_with(sprites[first_border_sprite + 3])) {
@@ -510,7 +515,7 @@ namespace octet {
       font_texture = resource_dict::get_texture_handle(GL_RGBA, "assets/big_0.gif");
 
       GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/tiger_man_test.gif");
-      sprites[ship_sprite].init(ship, 0, -2.75f, 0.25f, 0.25f);
+      sprites[ship_sprite].init(ship, 0, -1.0f, 0.25f, 0.25f);
 
       GLuint GameOver = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/GameOver.gif");
       sprites[game_over_sprite].init(GameOver, 20, 0, 3, 1.5f);
