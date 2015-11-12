@@ -270,7 +270,6 @@ namespace octet {
 
 
 
-
     // called when we hit an enemy
     void on_hit_invaderer() {
       ALuint source = get_sound_source();
@@ -301,35 +300,40 @@ namespace octet {
     }
 
     // use the keyboard to move the ship
-	//change collision for new border on
+	
 	void move_ship() {
 		const float ship_speed = 0.05f;
 		// left and right arrows
 		
-		
-		if (is_key_down(key_left)) {
-			sprites[ship_sprite].translate(-ship_speed, 0);
-			if (sprites[ship_sprite].collides_with(sprites[first_border_sprite + 2])) {
-				sprites[ship_sprite].translate(+ship_speed, 0);
-			}
-		}
-		else if (is_key_down(key_right)) {
-			sprites[ship_sprite].translate(+ship_speed, 0);
-			if (sprites[ship_sprite].collides_with(sprites[first_border_sprite + 3])) {
-				sprites[ship_sprite].translate(-ship_speed, 0);
-			}
-		}
-		else if (is_key_down(key_up)) {
-			sprites[ship_sprite].translate(0, +ship_speed);
-		}
-
-		else if (is_key_down(key_down)) {
-			sprites[ship_sprite].translate(0, -ship_speed);
-		}
-
-	}
 
 
+				if (is_key_down(key_left)) {
+					sprites[ship_sprite].translate(-ship_speed, 0);
+					if (sprites[ship_sprite].collides_with(sprite ) {
+						sprites[ship_sprite].translate(+ship_speed, 0);
+					}
+
+
+
+					else if (is_key_down(key_right)) {
+						sprites[ship_sprite].translate(+ship_speed, 0);
+						if (sprites[ship_sprite].collides_with(sprites[first_border_sprite + 3])) {
+							sprites[ship_sprite].translate(-ship_speed, 0);
+						}
+					}
+				}
+				else if (is_key_down(key_up)) {
+					sprites[ship_sprite].translate(0, +ship_speed);
+				}
+
+				else if (is_key_down(key_down)) {
+					sprites[ship_sprite].translate(0, -ship_speed);
+				}
+
+
+
+		}
+	
 
 	
     // fire button (space)
@@ -509,7 +513,7 @@ namespace octet {
 
       font_texture = resource_dict::get_texture_handle(GL_RGBA, "assets/big_0.gif");
 
-      GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/tiger_man_test.gif");
+      GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_naked.gif");
       sprites[ship_sprite].init(ship, 0, -2.75f, 0.25f, 0.25f);
 
       GLuint GameOver = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/GameOver.gif");
