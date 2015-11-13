@@ -209,7 +209,6 @@ namespace octet {
 	static const int map_width = 20;
 	static const int map_height = 20;
 	int map[map_height][map_width];
-
 	dynarray<sprite> map_sprite_background;
 		
     ALuint get_sound_source() { return sources[cur_source++ % num_sound_sources]; }
@@ -540,6 +539,7 @@ namespace octet {
       cameraToWorld.loadIdentity();
       cameraToWorld.translate(0, 0, 3);
 
+	  //initializes sprites at normal texture
       font_texture = resource_dict::get_texture_handle(GL_RGBA, "assets/big_0.gif");
 
       GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur.gif");
