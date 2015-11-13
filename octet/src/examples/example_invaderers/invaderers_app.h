@@ -210,6 +210,10 @@ namespace octet {
 	static const int map_height = 20;
 	int map[map_height][map_width];
 	dynarray<sprite> map_sprite_background;
+
+	//Declare global variables for main character sprite
+	float sir_arthur_height = 0.25f;
+	float sir_arthur_width = 0.25f;
 		
     ALuint get_sound_source() { return sources[cur_source++ % num_sound_sources]; }
 
@@ -266,7 +270,6 @@ namespace octet {
 			}
 		}
 	}
-
 
 
 
@@ -543,7 +546,7 @@ namespace octet {
       font_texture = resource_dict::get_texture_handle(GL_RGBA, "assets/big_0.gif");
 
       GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur.gif");
-      sprites[ship_sprite].init(ship, 0, -1.0f, 0.25f, 0.25f);
+      sprites[ship_sprite].init(ship, -2.5f, -2.5f, sir_arthur_width, sir_arthur_height);  
 
       GLuint GameOver = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/GameOver.gif");
       sprites[game_over_sprite].init(GameOver, 20, 0, 3, 1.5f);
