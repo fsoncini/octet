@@ -100,10 +100,10 @@ namespace octet {
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         }
 
-        void render(federico_shader &shader, mat4t &cameraToWorld) {
+        void render(federico_shader &shader, mat4t &cameraToWorld, vec4 color) {
             mat4t modelToProjection = mat4t::build_projection_matrix(modelToWorld, cameraToWorld);
 
-            shader.render(modelToProjection);
+            shader.render(modelToProjection, color);
 
             float vertices[] = {
                 -halfWidth, -halfHeight, 0,
@@ -195,6 +195,7 @@ namespace octet {
             num_missiles = 2,
             num_bombs = 2,
             num_borders = 4,
+            num_boss_missiles = 3,
 
             // sprite definitions
             ship_sprite = 0,
@@ -206,8 +207,8 @@ namespace octet {
             first_bomb_sprite,
             last_bomb_sprite = first_bomb_sprite + num_bombs - 1,
 
-            first_border_sprite,
-            last_border_sprite = first_border_sprite + num_borders - 1,
+            first_boss_missile,
+            last_boss_missile = first_boss_missile + num_boss_missiles - 1,
 
             num_sprites,
 
@@ -216,6 +217,7 @@ namespace octet {
         // timers for missiles and bombs
         int missiles_disabled;
         int bombs_disabled;
+        int boss_missiles_disabled;
 
         // accounting for bad guys
         int live_invaderers;
@@ -254,8 +256,8 @@ namespace octet {
         dynarray<sprite> invaderers;
         dynarray<sprite> vampires;
         dynarray<sprite> coins;
-        sprite boss_sprite;
         sprite bg_sprite;
+        sprite boss_key;
 
         //Declare global variables for main character sprite
         float sir_arthur_height = 0.35f;
@@ -265,6 +267,16 @@ namespace octet {
         bool isJumping = false;
         bool canJump = true;
         int jumpFrameCount = 0;
+
+        //Endgame stuff
+        bool isBossEnabled = false;
+        sprite boss_sprite;
+        int boss_lives = 5;
+
+        bool isBossJumping = false;
+        bool canBossJump = false;
+        int bossJumpFrameCount = 0;
+        int timeWithoutArmor = 0;
 
         ALuint get_sound_source() { return sources[cur_source++ % num_sound_sources]; }
 
@@ -325,6 +337,9 @@ namespace octet {
                         s.is_facing_right() = false;
                         vampires.push_back(s);
                     }
+                    else if (map[i][j] == 5) {
+                        boss_key.init(invaderer, -3 + 0.15f + 0.3f*j, 3 - 0.12f - 0.3f*i, 0.3f, 0.3f);
+                    }
                 }
             }
         }
@@ -357,7 +372,19 @@ namespace octet {
 
             if (--num_lives == 0) {
                 game_over = true;
-                float dx = sprites[ship_sprite].get_position().x() - sprites[game_over_sprite].get_position().x();
+                float dx = bg_sprite.get_position().x() - sprites[game_over_sprite].get_position().x();
+                sprites[game_over_sprite].translate(dx, 0);
+            }
+        }
+
+        void on_hit_boss() {
+            ALuint source = get_sound_source();
+            alSourcei(source, AL_BUFFER, bang);
+            alSourcePlay(source);
+
+            if (--boss_lives == 0) {
+                game_over = true;
+                float dx = bg_sprite.get_position().x() - sprites[game_over_sprite].get_position().x();
                 sprites[game_over_sprite].translate(dx, 0);
             }
         }
@@ -418,6 +445,19 @@ namespace octet {
 
                 }
 
+            }
+
+            if (boss_key.is_enabled() && boss_key.collides_with(sprites[ship_sprite])) {
+                isBossEnabled = true;
+                invaderers.resize(0);
+                vampires.resize(0);
+                boss_key.is_enabled() = false;
+
+                GLuint boss = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/boss_flipped.gif");
+                float dx = sprites[ship_sprite].get_position().x() - 3.5f;
+                float dy = sprites[ship_sprite].get_position().y() + 4.0f;
+                boss_sprite.init(boss, dx, dy, 1.0f, 1.1f);
+                boss_sprite.is_facing_right() = true;
             }
 
             bg_sprite.translate(sprites[ship_sprite].get_position().x() - bg_sprite.get_position().x(), 0.0f);
@@ -511,31 +551,39 @@ namespace octet {
                         missile.translate(-missile_speed, 0);
                     }
                     
-                    for (int j = 0; j != invaderers.size(); ++j) {
-                        sprite &invaderer = invaderers[j];
-                        if (invaderer.is_enabled() && missile.collides_with(invaderer)) {
-                            invaderer.is_enabled() = false;
-                            invaderer.translate(20, 0);
-                            missile.is_enabled() = false;
-                            missile.translate(20, 0);
-                            on_hit_invaderer();
+                    if (!isBossEnabled) {
+                        for (int j = 0; j != invaderers.size(); ++j) {
+                            sprite &invaderer = invaderers[j];
+                            if (invaderer.is_enabled() && missile.collides_with(invaderer)) {
+                                invaderer.is_enabled() = false;
+                                invaderer.translate(20, 0);
+                                missile.is_enabled() = false;
+                                missile.translate(20, 0);
+                                on_hit_invaderer();
 
-                            goto next_missile;
+                                goto next_missile;
+                            }
+                        }
+
+                        for (int j = 0; j != vampires.size(); ++j) {
+                            sprite &vampire = vampires[j];
+                            if (vampire.is_enabled() && missile.collides_with(vampire)) {
+                                vampire.is_enabled() = false;
+                                vampire.translate(20, 0);
+                                missile.is_enabled() = false;
+                                missile.translate(20, 0);
+                                on_hit_invaderer();
+
+                                goto next_missile;
+                            }
                         }
                     }
-
-                    for (int j = 0; j != vampires.size(); ++j) {
-                        sprite &vampire = vampires[j];
-                        if (vampire.is_enabled() && missile.collides_with(vampire)) {
-                            vampire.is_enabled() = false;
-                            vampire.translate(20, 0);
-                            missile.is_enabled() = false;
-                            missile.translate(20, 0);
-                            on_hit_invaderer();
-
-                            goto next_missile;
+                    else {
+                        if (missile.collides_with(boss_sprite)) {
+                            on_hit_boss();
                         }
                     }
+                    
 
                     for (unsigned int j = 0; j < map_sprite_background.size(); ++j) {
                         if (missile.collides_with(map_sprite_background[j])) {
@@ -562,9 +610,11 @@ namespace octet {
                         on_hit_ship();
                         goto next_bomb;
                     }
-                    if (bomb.collides_with(sprites[first_border_sprite + 0])) {
-                        bomb.is_enabled() = false;
-                        bomb.translate(20, 0);
+                    for (unsigned int j = 0; j < map_sprite_background.size(); ++j) {
+                        if (bomb.collides_with(map_sprite_background[j])) {
+                            bomb.is_enabled() = false;
+                            bomb.translate(20, 0);
+                        }
                     }
                 }
             next_bomb:;
@@ -614,9 +664,17 @@ namespace octet {
         void vampire_attack() {
             for (unsigned int i = 0; i < vampires.size(); ++i) {
                 if (vampires[i].collides_with(sprites[ship_sprite])) {
+                    float distance = vampires[i].get_position().x() - sprites[ship_sprite].get_position().x();
+                    if (distance > 0.0f) {
+                        sprites[ship_sprite].translate(-1.0f, 0.0f);
+                    }
+                    else {
+                        sprites[ship_sprite].translate(1.0f, 0.0f);
+                    }
+
                     if (--num_lives == 0) {
                         game_over = true;
-                        float dx = sprites[ship_sprite].get_position().x() - sprites[game_over_sprite].get_position().x();
+                        float dx = bg_sprite.get_position().x() - sprites[game_over_sprite].get_position().x();
                         sprites[game_over_sprite].translate(dx, 0);
                     }
                 }
@@ -632,6 +690,129 @@ namespace octet {
                 }
             }
             return false;
+        }
+
+        void move_boss() {
+            const float boss_speed = 0.02f;
+
+            float distance = sprites[ship_sprite].get_position().x() - boss_sprite.get_position().x();
+            if (distance < 0.0f) {
+                boss_sprite.is_facing_right() = false;
+                boss_sprite.translate(-boss_speed, 0.0f);
+            }
+            else {
+                boss_sprite.is_facing_right() = true;
+                boss_sprite.translate(boss_speed, 0.0f);
+            }
+
+            if (canBossJump && !isBossJumping) {
+                float jumpProb = randomizer.get(0.0f, 100.0f);
+                if (jumpProb > 95.0f) {
+                    isBossJumping = true;
+                    canBossJump = false;
+                }
+            }
+
+            if (isBossJumping && bossJumpFrameCount <= 50) {
+                boss_sprite.translate(0.0f, boss_speed);
+                ++bossJumpFrameCount;
+            }
+            else if (bossJumpFrameCount > 50) {
+                isBossJumping = false;
+            }
+
+            if (!isBossJumping) {
+                boss_sprite.translate(0.0f, -boss_speed);
+                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+                    if (boss_sprite.collides_with(map_sprite_background[i])) {
+                        boss_sprite.translate(0.0f, boss_speed);
+                        bossJumpFrameCount = 0;
+                        canBossJump = true;
+                    }
+                }
+            }
+
+            if (boss_sprite.collides_with(sprites[ship_sprite])) {
+                float distance = boss_sprite.get_position().x() - sprites[ship_sprite].get_position().x();
+                if (distance > 0.0f) {
+                    sprites[ship_sprite].translate(-2.0f, 0.0f);
+                }
+                else {
+                    sprites[ship_sprite].translate(2.0f, 0.0f);
+                }
+
+                on_hit_ship();
+            }
+        }
+
+        void fire_boss_missiles() {
+            if (boss_missiles_disabled) {
+                --boss_missiles_disabled;
+            }
+            else {
+                for (int i = 0; i != num_boss_missiles; ++i) {
+                    if (!sprites[first_boss_missile + i].is_enabled()) {
+                        if (boss_sprite.is_facing_right()) {
+                            sprites[first_boss_missile + i].set_relative(boss_sprite, 0.5f, -0.3f);
+                            sprites[first_boss_missile + i].is_facing_right() = true;
+                        }
+                        else {
+                            sprites[first_boss_missile + i].set_relative(boss_sprite, -0.5f, -0.3f);
+                            sprites[first_boss_missile + i].is_facing_right() = false;
+                        }
+                        
+                        sprites[first_boss_missile + i].is_enabled() = true;
+                        boss_missiles_disabled = 30;
+
+                        ALuint source = get_sound_source();
+                        alSourcei(source, AL_BUFFER, whoosh);
+                        alSourcePlay(source);
+                        return;
+                    }
+                }
+                return;
+
+            }
+        }
+
+        void move_boss_missiles() {
+            const float bomb_speed = 0.2f;
+            for (int i = 0; i != num_boss_missiles; ++i) {
+                sprite &bomb = sprites[first_boss_missile + i];
+                if (bomb.is_enabled()) {
+                    if (bomb.is_facing_right()) {
+                        bomb.translate(bomb_speed, 0.0f);
+                    }
+                    else {
+                        bomb.translate(-bomb_speed, 0.0f);
+                    }
+                    
+                    if (bomb.collides_with(sprites[ship_sprite])) {
+                        bomb.is_enabled() = false;
+                        bomb.translate(20, 0);
+                        bombs_disabled = 50;
+                        on_hit_ship();
+                        goto next_boss_bomb;
+                    }
+                    for (unsigned int j = 0; j < map_sprite_background.size(); ++j) {
+                        if (bomb.collides_with(map_sprite_background[j])) {
+                            bomb.is_enabled() = false;
+                            bomb.translate(20, 0);
+                        }
+                    }
+                }
+            next_boss_bomb:;
+            }
+        }
+
+        void give_armor() {
+            if (num_lives == 1 && timeWithoutArmor <= 45) {
+                ++timeWithoutArmor;
+            }
+            if (num_lives == 1 && timeWithoutArmor > 45) {
+                num_lives = 2;
+                timeWithoutArmor = 0;
+            }
         }
 
 
@@ -708,6 +889,11 @@ namespace octet {
                 sprites[first_missile_sprite + i].is_enabled() = false;
             }
 
+            for (int i = 0; i != num_boss_missiles; ++i) {
+                sprites[first_boss_missile + i].init(missile, 20, 0, 0.25f, 0.0625f);
+                sprites[first_boss_missile + i].is_enabled() = false;
+            }
+
             // use the bomb texture
             GLuint bomb = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/bomb.gif");
             for (int i = 0; i != num_bombs; ++i) {
@@ -727,9 +913,10 @@ namespace octet {
             // sundry counters and game state.
             missiles_disabled = 0;
             bombs_disabled = 50;
+            boss_missiles_disabled = 40;
             invader_velocity = 0.01f;
             live_invaderers = invaderers.size();
-            num_lives = 10;
+            num_lives = 2;
             game_over = false;
             score = 0;
         }
@@ -744,25 +931,37 @@ namespace octet {
 
             fire_missiles();
 
-            fire_bombs();
-
             move_missiles();
 
-            move_bombs();
+            if (!isBossEnabled) {
+                fire_bombs();
 
-            move_invaders(invader_velocity, 0);
+                move_bombs();
 
-            move_vampires(fabsf(invader_velocity));
+                move_invaders(invader_velocity, 0);
 
-            vampire_attack();
+                move_vampires(fabsf(invader_velocity));
 
-            for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
-                sprite &border = map_sprite_background[i];
-                if (invaders_collide(border)) {
-                    invader_velocity = -invader_velocity;
-                    move_invaders(invader_velocity, -0.1f);
+                vampire_attack();
+
+                for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
+                    sprite &border = map_sprite_background[i];
+                    if (invaders_collide(border)) {
+                        invader_velocity = -invader_velocity;
+                        move_invaders(invader_velocity, -0.1f);
+                    }
                 }
             }
+            else {
+                move_boss();
+
+                fire_boss_missiles();
+
+                move_boss_missiles();
+
+                give_armor();
+            }
+            
         }
 
         // this is called to draw the world
@@ -788,7 +987,16 @@ namespace octet {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             //draw background with our custom shader
-            bg_sprite.render(federico_shader_, cameraToWorld);
+            if (!isBossEnabled) {
+                bg_sprite.render(federico_shader_, cameraToWorld, vec4(102.0 / 255.0, 47.0 / 255.0, 12.0 / 255.0, 1.0));
+            }
+            else {
+                bg_sprite.render(federico_shader_, cameraToWorld, vec4(50.0 / 255.0, 14.0 / 255.0, 80.0 / 255.0, 1.0));
+            }
+            
+            //end level boss fight
+            if (boss_key.is_enabled())
+                boss_key.render(texture_shader_, cameraToWorld);
 
             //draw the map sprites (border)
             for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
@@ -797,34 +1005,69 @@ namespace octet {
                 }
             }
 
-            for (unsigned int i = 0; i < invaderers.size(); ++i) {
-                invaderers[i].render(texture_shader_, cameraToWorld);
-            }
+            if (!isBossEnabled) {
+                for (unsigned int i = 0; i < invaderers.size(); ++i) {
+                    invaderers[i].render(texture_shader_, cameraToWorld);
+                }
 
-            for (unsigned int i = 0; i < vampires.size(); ++i) {
-                vampires[i].render(texture_shader_, cameraToWorld);
-                GLuint vamp = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/vampire.gif");
-                GLuint vamp_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/vampire_flipped.gif");
-                if (vampires[i].is_facing_right()) {
-                    vampires[i].swap_sprite(vamp);
+                for (unsigned int i = 0; i < vampires.size(); ++i) {
+                    vampires[i].render(texture_shader_, cameraToWorld);
+                    GLuint vamp = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/vampire.gif");
+                    GLuint vamp_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/vampire_flipped.gif");
+                    if (vampires[i].is_facing_right()) {
+                        vampires[i].swap_sprite(vamp);
+                    }
+                    else {
+                        vampires[i].swap_sprite(vamp_left);
+                    }
+                }
+            }
+            else {
+                GLuint boss = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/boss.gif");
+                GLuint boss_flipped = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/boss_flipped.gif");
+                if (boss_sprite.is_facing_right()) {
+                    boss_sprite.swap_sprite(boss_flipped);
                 }
                 else {
-                    vampires[i].swap_sprite(vamp_left);
+                    boss_sprite.swap_sprite(boss);
                 }
+
+                boss_sprite.render(texture_shader_, cameraToWorld);
             }
+            
 
             // draw all the sprites
             for (int i = 0; i != num_sprites; ++i) {
                 sprites[i].render(texture_shader_, cameraToWorld);
 
-                GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur.gif");
-                GLuint ship_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_flipped.gif");
                 if (i == ship_sprite) {
+                    GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur.gif");
+                    GLuint ship_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_flipped.gif");
+                    GLuint ship2 = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_naked.gif");
+                    GLuint ship2_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_naked_flipped.gif");
+
                     if (sprites[i].is_facing_right()) {
-                        sprites[i].swap_sprite(ship);
+                        if (num_lives > 1)
+                            sprites[i].swap_sprite(ship);
+                        else
+                            sprites[i].swap_sprite(ship2);
                     }
                     else {
-                        sprites[i].swap_sprite(ship_left);
+                        if (num_lives > 1)
+                            sprites[i].swap_sprite(ship_left);
+                        else
+                            sprites[i].swap_sprite(ship2_left);
+                    }
+                }
+                else if (i >= first_boss_missile && i <= last_boss_missile) {
+                    GLuint missile = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile_horizontal.gif");
+                    GLuint missile_flipped = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile_horizontal_flipped.gif");
+
+                    if (sprites[i].is_facing_right()) {
+                        sprites[i].swap_sprite(missile);
+                    }
+                    else {
+                        sprites[i].swap_sprite(missile_flipped);
                     }
                 }
             }
