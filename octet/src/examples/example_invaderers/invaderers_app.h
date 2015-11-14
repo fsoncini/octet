@@ -307,7 +307,8 @@ namespace octet {
 
             if (--num_lives == 0) {
                 game_over = true;
-                sprites[game_over_sprite].translate(-20, 0);
+                float dx = sprites[ship_sprite].get_position().x() - sprites[game_over_sprite].get_position().x();
+                sprites[game_over_sprite].translate(dx, 0);
             }
         }
 
@@ -509,6 +510,18 @@ namespace octet {
             }
         }
 
+        void vampire_attack() {
+            for (unsigned int i = 0; i < vampires.size(); ++i) {
+                if (vampires[i].collides_with(sprites[ship_sprite])) {
+                    if (--num_lives == 0) {
+                        game_over = true;
+                        float dx = sprites[ship_sprite].get_position().x() - sprites[game_over_sprite].get_position().x();
+                        sprites[game_over_sprite].translate(dx, 0);
+                    }
+                }
+            }
+        }
+
         // check if any invaders hit the sides.
         bool invaders_collide(sprite &border) {
             for (int j = 0; j != invaderers.size(); ++j) {
@@ -635,6 +648,8 @@ namespace octet {
             move_invaders(invader_velocity, 0);
 
             move_vampires(fabsf(invader_velocity));
+
+            vampire_attack();
 
             for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
                 sprite &border = map_sprite_background[i];
