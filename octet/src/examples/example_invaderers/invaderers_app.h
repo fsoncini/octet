@@ -33,6 +33,8 @@ namespace octet {
 
         // true if this sprite is enabled.
         bool enabled;
+
+        bool isFacingRight;
     public:
         sprite() {
             texture = 0;
@@ -98,6 +100,34 @@ namespace octet {
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         }
 
+        void render(federico_shader &shader, mat4t &cameraToWorld) {
+            mat4t modelToProjection = mat4t::build_projection_matrix(modelToWorld, cameraToWorld);
+
+            shader.render(modelToProjection);
+
+            float vertices[] = {
+                -halfWidth, -halfHeight, 0,
+                halfWidth, -halfHeight, 0,
+                halfWidth, halfHeight, 0,
+                -halfWidth, halfHeight, 0,
+            };
+
+            glVertexAttribPointer(attribute_pos, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)vertices);
+            glEnableVertexAttribArray(attribute_pos);
+
+            static const float uvs[] = {
+                0, 0,
+                1, 0,
+                1, 1,
+                0, 1,
+            };
+
+            glVertexAttribPointer(attribute_uv, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)uvs);
+            glEnableVertexAttribArray(attribute_uv);
+
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        }
+
         // move the object
         void translate(float x, float y) {
             modelToWorld.translate(x, y, 0);
@@ -110,6 +140,18 @@ namespace octet {
 
         vec2 get_position() {
             return vec2(modelToWorld[3][0], modelToWorld[3][1]);
+        }
+
+        void rotate_z(float angle) {
+            modelToWorld.rotateZ(angle);
+        }
+
+        void swap_sprite(int texture_) {
+            texture = texture_;
+        }
+
+        bool& is_facing_right() {
+            return isFacingRight;
         }
 
         // return true if this sprite collides with another.
@@ -146,6 +188,7 @@ namespace octet {
 
         // shader to draw a textured triangle
         texture_shader texture_shader_;
+        federico_shader federico_shader_;
 
         enum {
             num_sound_sources = 8,
@@ -212,6 +255,7 @@ namespace octet {
         dynarray<sprite> vampires;
         dynarray<sprite> coins;
         sprite boss_sprite;
+        sprite bg_sprite;
 
         //Declare global variables for main character sprite
         float sir_arthur_height = 0.35f;
@@ -268,11 +312,17 @@ namespace octet {
                         //num_bush++;
                     }
                     else if (map[i][j] == 2) {
+                        s.init(bush, -3 + 0.15f + 0.3f*j, 3 - 0.15f - 0.3f*i, 0.3f, 0.3f);
+                        s.is_enabled() = false;
+                        map_sprite_background.push_back(s);
+                    }
+                    else if (map[i][j] == 3) {
                         s.init(invaderer, -3 + 0.15f + 0.3f*j, 3 - 0.15f - 0.3f*i, 0.25f, 0.25f);
                         invaderers.push_back(s);
                     }
-                    else if (map[i][j] == 3) {
+                    else if (map[i][j] == 4) {
                         s.init(vampire, -3 + 0.15f + 0.3f*j, 3 - 0.12f - 0.3f*i, 0.7f, 0.35f);
+                        s.is_facing_right() = false;
                         vampires.push_back(s);
                     }
                 }
@@ -345,6 +395,7 @@ namespace octet {
             if (is_key_down(key_left)) {
 
                 sprites[ship_sprite].translate(-ship_speed, 0);
+                sprites[ship_sprite].is_facing_right() = false;
 
                 for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
 
@@ -357,6 +408,7 @@ namespace octet {
             else if (is_key_down(key_right)) {
 
                 sprites[ship_sprite].translate(+ship_speed, 0);
+                sprites[ship_sprite].is_facing_right() = true;
 
                 for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
 
@@ -368,7 +420,18 @@ namespace octet {
 
             }
 
+            bg_sprite.translate(sprites[ship_sprite].get_position().x() - bg_sprite.get_position().x(), 0.0f);
             cameraToWorld.translate(sprites[ship_sprite].get_position().x() - cameraToWorld[3][0], 0.0f, 0.0f);
+            if (cameraToWorld[3][0] < 0.0f) {
+                cameraToWorld.translate(-cameraToWorld[3][0], 0.0f, 0.0f);
+                bg_sprite.translate(-bg_sprite.get_position().x(), 0.0f);
+            }
+            else if (cameraToWorld[3][0] > map_width*0.3f - 6.0f) {
+                cameraToWorld.translate(map_width*0.3f - 6.0f - cameraToWorld[3][0], 0.0f, 0.0f);
+                bg_sprite.translate(map_width*0.3f - 6.0f - bg_sprite.get_position().x(), 0.0f);
+            }
+            
+            
         }
 
         // fire button (space)
@@ -380,8 +443,22 @@ namespace octet {
                 // find a missile
                 for (int i = 0; i != num_missiles; ++i) {
                     if (!sprites[first_missile_sprite + i].is_enabled()) {
-                        sprites[first_missile_sprite + i].set_relative(sprites[ship_sprite], 0, 0.5f);
+                        sprites[first_missile_sprite + i].set_relative(sprites[ship_sprite], 0.0f, 0.0f);
                         sprites[first_missile_sprite + i].is_enabled() = true;
+
+                        GLuint miss = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile_horizontal.gif");
+                        GLuint miss_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile_horizontal_flipped.gif");
+
+                        if (sprites[ship_sprite].is_facing_right()) {
+                            sprites[first_missile_sprite + i].swap_sprite(miss);
+                            sprites[first_missile_sprite + i].is_facing_right() = true;
+                        }
+                        else {
+                            sprites[first_missile_sprite + i].swap_sprite(miss_left);
+                            sprites[first_missile_sprite + i].is_facing_right() = false;
+                        }
+
+
                         missiles_disabled = 5;
                         ALuint source = get_sound_source();
                         alSourcei(source, AL_BUFFER, whoosh);
@@ -406,7 +483,7 @@ namespace octet {
                         // find a bomb
                         for (int i = 0; i != num_bombs; ++i) {
                             if (!sprites[first_bomb_sprite + i].is_enabled()) {
-                                sprites[first_bomb_sprite + i].set_relative(invaderer, 0, -0.25f);
+                                sprites[first_bomb_sprite + i].set_relative(invaderer, 0.0f, -0.25f);
                                 sprites[first_bomb_sprite + i].is_enabled() = true;
                                 bombs_disabled = 30;
                                 ALuint source = get_sound_source();
@@ -427,7 +504,13 @@ namespace octet {
             for (int i = 0; i != num_missiles; ++i) {
                 sprite &missile = sprites[first_missile_sprite + i];
                 if (missile.is_enabled()) {
-                    missile.translate(0, missile_speed);
+                    if (missile.is_facing_right()) {
+                        missile.translate(missile_speed, 0);
+                    }
+                    else {
+                        missile.translate(-missile_speed, 0);
+                    }
+                    
                     for (int j = 0; j != invaderers.size(); ++j) {
                         sprite &invaderer = invaderers[j];
                         if (invaderer.is_enabled() && missile.collides_with(invaderer)) {
@@ -440,9 +523,25 @@ namespace octet {
                             goto next_missile;
                         }
                     }
-                    if (missile.collides_with(sprites[first_border_sprite + 1])) {
-                        missile.is_enabled() = false;
-                        missile.translate(20, 0);
+
+                    for (int j = 0; j != vampires.size(); ++j) {
+                        sprite &vampire = vampires[j];
+                        if (vampire.is_enabled() && missile.collides_with(vampire)) {
+                            vampire.is_enabled() = false;
+                            vampire.translate(20, 0);
+                            missile.is_enabled() = false;
+                            missile.translate(20, 0);
+                            on_hit_invaderer();
+
+                            goto next_missile;
+                        }
+                    }
+
+                    for (unsigned int j = 0; j < map_sprite_background.size(); ++j) {
+                        if (missile.collides_with(map_sprite_background[j])) {
+                            missile.is_enabled() = false;
+                            missile.translate(20, 0);
+                        }
                     }
                 }
             next_missile:;
@@ -492,9 +591,11 @@ namespace octet {
                     if (fabsf(distance) <= 3.0f) {
                         if (distance < 0.0f) {
                             vampire.translate(dx, -ship_speed);
+                            vampire.is_facing_right() = false;
                         }
                         else {
                             vampire.translate(-dx, -ship_speed);
+                            vampire.is_facing_right() = true;
                         }
                     }
                     else {
@@ -577,6 +678,7 @@ namespace octet {
         void app_init() {
             // set up the shader
             texture_shader_.init();
+            federico_shader_.init();
 
             //read the Csv
             read_csv();
@@ -593,15 +695,16 @@ namespace octet {
 
             GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur.gif");
             sprites[ship_sprite].init(ship, -2.5f, -2.5f, sir_arthur_width, sir_arthur_height);
+            sprites[ship_sprite].is_facing_right() = true;
 
             GLuint GameOver = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/GameOver.gif");
             sprites[game_over_sprite].init(GameOver, 20, 0, 3, 1.5f);
 
             // use the missile texture
-            GLuint missile = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile.gif");
+            GLuint missile = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile_horizontal.gif");
             for (int i = 0; i != num_missiles; ++i) {
                 // create missiles off-screen
-                sprites[first_missile_sprite + i].init(missile, 20, 0, 0.0625f, 0.25f);
+                sprites[first_missile_sprite + i].init(missile, 20, 0, 0.25f, 0.0625f);
                 sprites[first_missile_sprite + i].is_enabled() = false;
             }
 
@@ -612,6 +715,8 @@ namespace octet {
                 sprites[first_bomb_sprite + i].init(bomb, 20, 0, 0.0625f, 0.25f);
                 sprites[first_bomb_sprite + i].is_enabled() = false;
             }
+
+            bg_sprite.init(0, 0.0f, 0.0f, 6.0f, 6.0f);
 
             // sounds
             whoosh = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/whoosh.wav");
@@ -682,9 +787,14 @@ namespace octet {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+            //draw background with our custom shader
+            bg_sprite.render(federico_shader_, cameraToWorld);
+
             //draw the map sprites (border)
             for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
-                map_sprite_background[i].render(texture_shader_, cameraToWorld);
+                if (map_sprite_background[i].is_enabled()) {
+                    map_sprite_background[i].render(texture_shader_, cameraToWorld);
+                }
             }
 
             for (unsigned int i = 0; i < invaderers.size(); ++i) {
@@ -693,11 +803,30 @@ namespace octet {
 
             for (unsigned int i = 0; i < vampires.size(); ++i) {
                 vampires[i].render(texture_shader_, cameraToWorld);
+                GLuint vamp = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/vampire.gif");
+                GLuint vamp_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/vampire_flipped.gif");
+                if (vampires[i].is_facing_right()) {
+                    vampires[i].swap_sprite(vamp);
+                }
+                else {
+                    vampires[i].swap_sprite(vamp_left);
+                }
             }
 
             // draw all the sprites
             for (int i = 0; i != num_sprites; ++i) {
                 sprites[i].render(texture_shader_, cameraToWorld);
+
+                GLuint ship = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur.gif");
+                GLuint ship_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_flipped.gif");
+                if (i == ship_sprite) {
+                    if (sprites[i].is_facing_right()) {
+                        sprites[i].swap_sprite(ship);
+                    }
+                    else {
+                        sprites[i].swap_sprite(ship_left);
+                    }
+                }
             }
 
             char score_text[32];
