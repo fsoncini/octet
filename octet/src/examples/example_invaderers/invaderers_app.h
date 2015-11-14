@@ -249,8 +249,8 @@ namespace octet {
         bitmap_font font;
 
         //Declare arrays and global variables, used in reading and implementing Csv file
-        static const int map_width = 33;
-        static const int map_height = 33;
+        static const int map_width = 61;
+        static const int map_height = 20;
         int map[map_height][map_width];
         dynarray<sprite> map_sprite_background;
         dynarray<sprite> invaderers;
