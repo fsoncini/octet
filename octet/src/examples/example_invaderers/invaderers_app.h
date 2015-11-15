@@ -447,10 +447,12 @@ namespace octet {
 
             }
 
-            if (boss_key.is_enabled() && boss_key.collides_with(sprites[ship_sprite])) {
+            if (boss_key.is_enabled() && boss_key.collides_with(sprites[ship_sprite])) { 
                 isBossEnabled = true;
                 invaderers.resize(0);
                 vampires.resize(0);
+                sprite &bomb = sprites[first_bomb_sprite];
+                bomb.translate(0, -20);
                 boss_key.is_enabled() = false;
 
                 GLuint boss = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/boss_flipped.gif");
@@ -509,7 +511,7 @@ namespace octet {
             }
         }
 
-        // pick and invader and fire a bomb
+        // pick an invader and fire a bomb
         void fire_bombs() {
             if (bombs_disabled) {
                 --bombs_disabled;
@@ -605,7 +607,7 @@ namespace octet {
                     bomb.translate(0, -bomb_speed);
                     if (bomb.collides_with(sprites[ship_sprite])) {
                         bomb.is_enabled() = false;
-                        bomb.translate(20, 0);
+                        bomb.translate(0, -20);
                         bombs_disabled = 50;
                         on_hit_ship();
                         goto next_bomb;
@@ -613,7 +615,7 @@ namespace octet {
                     for (unsigned int j = 0; j < map_sprite_background.size(); ++j) {
                         if (bomb.collides_with(map_sprite_background[j])) {
                             bomb.is_enabled() = false;
-                            bomb.translate(20, 0);
+                            bomb.translate(0, -20);
                         }
                     }
                 }
@@ -631,6 +633,7 @@ namespace octet {
             }
         }
 
+        //make vampires move toward sir arthur ("ship")
         void move_vampires(float dx) {
             const float ship_speed = 0.05f;
 
@@ -661,6 +664,7 @@ namespace octet {
             }
         }
 
+        //make sir arthur jump back when he loses his armor
         void vampire_attack() {
             for (unsigned int i = 0; i < vampires.size(); ++i) {
                 if (vampires[i].collides_with(sprites[ship_sprite])) {
@@ -692,6 +696,7 @@ namespace octet {
             return false;
         }
 
+       //make boss move, jump and attack
         void move_boss() {
             const float boss_speed = 0.02f;
 
@@ -732,6 +737,7 @@ namespace octet {
                 }
             }
 
+            //make sir arthur ("ship") jump back when he loses his armor
             if (boss_sprite.collides_with(sprites[ship_sprite])) {
                 float distance = boss_sprite.get_position().x() - sprites[ship_sprite].get_position().x();
                 if (distance > 0.0f) {
@@ -789,7 +795,7 @@ namespace octet {
                     
                     if (bomb.collides_with(sprites[ship_sprite])) {
                         bomb.is_enabled() = false;
-                        bomb.translate(20, 0);
+                        bomb.translate(0, -20);
                         bombs_disabled = 50;
                         on_hit_ship();
                         goto next_boss_bomb;
@@ -797,7 +803,7 @@ namespace octet {
                     for (unsigned int j = 0; j < map_sprite_background.size(); ++j) {
                         if (bomb.collides_with(map_sprite_background[j])) {
                             bomb.is_enabled() = false;
-                            bomb.translate(20, 0);
+                            bomb.translate(0, -20);
                         }
                     }
                 }
@@ -805,6 +811,7 @@ namespace octet {
             }
         }
 
+        //lets sir Arthur regain armor
         void give_armor() {
             if (num_lives == 1 && timeWithoutArmor <= 45) {
                 ++timeWithoutArmor;
@@ -995,8 +1002,9 @@ namespace octet {
             }
             
             //end level boss fight
-            if (boss_key.is_enabled())
-                boss_key.render(texture_shader_, cameraToWorld);
+            if (boss_key.is_enabled());
+                boss_key.render(texture_shader_, cameraToWorld); 
+              
 
             //draw the map sprites (border)
             for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
@@ -1005,6 +1013,7 @@ namespace octet {
                 }
             }
 
+            //draws boss and vampires
             if (!isBossEnabled) {
                 for (unsigned int i = 0; i < invaderers.size(); ++i) {
                     invaderers[i].render(texture_shader_, cameraToWorld);
@@ -1036,7 +1045,7 @@ namespace octet {
             }
             
 
-            // draw all the sprites
+            // draw "ship" (sir arthur) and horizontal missiles
             for (int i = 0; i != num_sprites; ++i) {
                 sprites[i].render(texture_shader_, cameraToWorld);
 
