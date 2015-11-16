@@ -403,7 +403,13 @@ namespace octet {
             if (isJumping && jumpFrameCount <= 20) {
                 sprites[ship_sprite].translate(0, ship_speed);
                 ++jumpFrameCount;
+                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+                    if (sprites[ship_sprite].collides_with(map_sprite_background[i])) {
+                        isJumping = false;
+                    }
+                }
             }
+
             else if (jumpFrameCount > 20) {
                 isJumping = false;
             }
