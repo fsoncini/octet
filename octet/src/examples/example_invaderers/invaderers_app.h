@@ -670,16 +670,31 @@ namespace octet {
             }
         }
 
-        //make sir arthur jump back when he loses his armor
+        //make sir arthur jump back when he is hit once
         void vampire_attack() {
             for (unsigned int i = 0; i < vampires.size(); ++i) {
                 if (vampires[i].collides_with(sprites[ship_sprite])) {
                     float distance = vampires[i].get_position().x() - sprites[ship_sprite].get_position().x();
                     if (distance > 0.0f) {
-                        sprites[ship_sprite].translate(-1.0f, 0.0f);
+                        if (sprites[ship_sprite].get_position().x() < -3.0f + 0.3f + 1.0f + sir_arthur_width / 2.0f) {
+                            float dx = -3.0f + 0.3f + sir_arthur_width / 2.0f - sprites[ship_sprite].get_position().x();
+                            sprites[ship_sprite].translate(dx + 0.1f, 0.0f);
+                        }
+                        else {
+                            sprites[ship_sprite].translate(-1.0f, 0.0f);
+                        }
+
                     }
                     else {
-                        sprites[ship_sprite].translate(1.0f, 0.0f);
+                        if (sprites[ship_sprite].get_position().x() > 0.3f*map_width-3.0f - 0.3f - 1.0f - sir_arthur_width / 2.0f) {
+                            float sx = 0.3f*map_width - 3.0f - 0.3f - sir_arthur_width / 2.0f - sprites[ship_sprite].get_position().x();
+                            sprites[ship_sprite].translate(sx - 0.1f, 0.0f);
+                        }
+
+                        else
+                        {
+                            sprites[ship_sprite].translate(1.0f, 0.0f);
+                        }
                     }
 
                     if (--num_lives == 0) {
@@ -688,7 +703,8 @@ namespace octet {
                         sprites[game_over_sprite].translate(dx, 0);
                     }
                 }
-            }
+            }   
+            
         }
 
         // check if any invaders hit the sides.
@@ -746,11 +762,27 @@ namespace octet {
             //make sir arthur ("ship") jump back when he loses his armor
             if (boss_sprite.collides_with(sprites[ship_sprite])) {
                 float distance = boss_sprite.get_position().x() - sprites[ship_sprite].get_position().x();
+
                 if (distance > 0.0f) {
-                    sprites[ship_sprite].translate(-2.0f, 0.0f);
+                    if (sprites[ship_sprite].get_position().x() < -3.0f + 0.3f + 1.0f + sir_arthur_width / 2.0f) {
+                        float dx = -3.0f + 0.3f + sir_arthur_width / 2.0f - sprites[ship_sprite].get_position().x();
+                        sprites[ship_sprite].translate(dx + 0.1f, 0.0f);
+                    }
+                    else {
+                        sprites[ship_sprite].translate(-1.0f, 0.0f);
+                    }
+
                 }
                 else {
-                    sprites[ship_sprite].translate(2.0f, 0.0f);
+                    if (sprites[ship_sprite].get_position().x() > 0.3f*map_width - 3.0f - 0.3f - 1.0f - sir_arthur_width / 2.0f) {
+                        float sx = 0.3f*map_width - 3.0f - 0.3f - sir_arthur_width / 2.0f - sprites[ship_sprite].get_position().x();
+                        sprites[ship_sprite].translate(sx - 0.1f, 0.0f);
+                    }
+
+                    else
+                    {
+                        sprites[ship_sprite].translate(1.0f, 0.0f);
+                    }
                 }
 
                 on_hit_ship();
@@ -1089,7 +1121,12 @@ namespace octet {
 
             char score_text[32];
             sprintf(score_text, "score: %d   lives: %d\n", score, num_lives);
-            draw_text(texture_shader_, -1.75f, 2, 1.0f / 256, score_text);
+            if (sprites[ship_sprite].get_position().x() < 0.0f) {
+                draw_text(texture_shader_, -1.75f, 2, 1.0f / 256, score_text);
+            }
+            else {
+                draw_text(texture_shader_, sprites[ship_sprite].get_position().x() - 1.75f, 2, 1.0f / 256, score_text);
+            }
 
             // move the listener with the camera
             vec4 &cpos = cameraToWorld.w();
