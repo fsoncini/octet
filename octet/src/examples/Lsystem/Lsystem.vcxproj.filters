@@ -423,6 +423,9 @@
       <Filter>containers</Filter>
     </ClInclude>
     <ClInclude Include="Lsystem.h" />
+    <ClInclude Include="federico_tree2.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resources\mesh_builder.inl">
