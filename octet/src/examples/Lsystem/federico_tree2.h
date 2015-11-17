@@ -96,7 +96,7 @@ namespace octet {
 
         void read_file(int example_number) {
             dynarray<uint8_t> file_content;
-            std::string file_name = "assets/lsystems/lsystem" + std::to_string(example_number) + ".txt";
+            std::string file_name = "assets/lsystem/lsystem" + std::to_string(example_number) + ".txt";
             app_utils::get_url(file_content, file_name.c_str());
 
             read_lsystem_data(file_content);
