@@ -97,25 +97,26 @@ namespace octet {
      
 
         void handle_input() {
-            //add iterations          
+            //add iterations   
+            
             if (is_key_going_down(key_space)) {
-                t.apply();
-                ++current_iteration;              
-     
-                draw_again();
+                ++current_iteration;
+                t.apply();                  
+                draw_again();               
+                std::cout << "current iteration: " << current_iteration << "\n";
             }
 
-            //subtract iterations
+            //reverse iterations
             if (is_key_down(key_esc)) {                
-                
+                --current_iteration;
                 t.read_file(current_example);
-                for (unsigned int i = 1; i <= current_iteration -1; i++){
+                for (unsigned int i = 0; i <= current_iteration -1; i++){
                     t.apply();
                     draw_again();
-                }
-
-                draw_again();
-
+                }          
+                std::cout << "current iteration: " << current_iteration << "\n";
+                
+                              
             }
 
             if (is_key_going_down(key_right)) {
