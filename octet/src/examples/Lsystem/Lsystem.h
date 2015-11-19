@@ -50,10 +50,10 @@ namespace octet {
         material *material_leaf;
         material *material_autumn_leaf;
         int current_example = 1;//create a function to change this. 
-        int current_iteration = 1;
-        int n = 0;
+        int current_iteration = 0;
+        //int n = 0;
         const int min_example = 1;
-        const int MAX_example = 3;
+        const int MAX_example = 6;
 
 
         float far_plane = 500.0f;
@@ -138,6 +138,7 @@ namespace octet {
                 app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.50f));
             }
 
+            //increase angle at current iteration
             if (is_key_down(key_f1)) {
 
                 if (current_iteration) {
@@ -150,9 +151,6 @@ namespace octet {
                 }
                 
             }
-
-    
-
 
         }
 
@@ -193,7 +191,7 @@ namespace octet {
             scene_node *node = new scene_node();
             app_scene->add_child(node);
 
-            if (n < 4){
+            if (current_iteration < 4){
                 app_scene->add_mesh_instance(new mesh_instance(node, box, material_wood));
             }
             else {
@@ -204,26 +202,27 @@ namespace octet {
         }
 
         
-
         void create_geometry() {
             dynarray<char> axiom = t.get_axiom();
             vec3 pos = vec3(0.0f, 0.0f, 0.0f);
             float angle = 0.0f;
-           
-
             for (unsigned int i = 0; i < axiom.size(); ++i) {
                 if (axiom[i] == '+') {
 
                     //std::cout << "\Angle: " << angle << "\n";//check
                     switch (current_example)
                     {
-                    case 1: angle += 25.7f + add_angle;
+                    case 1: angle += (25.7f + add_angle);
                         break;
-
-                    case 2: angle += 20.0f + add_angle;
+                    case 2: angle += (20.0f + add_angle);
                         break;
-                    case 3: angle += 22.5f + add_angle;
+                    case 3: angle += (22.5f + add_angle);
                         break;
+                    case 4: angle += (20.0f + add_angle);
+                        break;
+                    case 5: angle += (25.7f + add_angle);
+                        break;
+                    case 6: angle += (22.5f + add_angle);
                     }
                 }
                 else if (axiom[i] == '-') {
@@ -232,13 +231,19 @@ namespace octet {
 
                     switch (current_example)
                     {
-                    case 1: angle -= 25.7f;
+                    case 1: angle -= (25.7f + add_angle);
                         break;
+                    case 2: angle -= (20.0f + add_angle);
+                        break;
+                    case 3: angle -= (22.5f + add_angle);
+                        break;
+                    case 4: angle -= (20.0f + add_angle);
+                        break;
+                    case 5: angle -= (25.7f + add_angle);
+                        break;
+                    case 6: angle -= (22.5f + add_angle);
 
-                    case 2: angle -= 20.0f;
-                        break;
-                    case 3: angle -= 22.5f;
-                        break;
+
                     }
                 }
                 else if (axiom[i] == '[') {
