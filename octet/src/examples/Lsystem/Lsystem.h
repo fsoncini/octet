@@ -97,12 +97,25 @@ namespace octet {
      
 
         void handle_input() {
+            //add iterations          
             if (is_key_going_down(key_space)) {
-                t.iterate();
-                ++current_iteration;
+                t.apply();
+                ++current_iteration;              
+     
+                draw_again();
+            }
 
+            //subtract iterations
+            if (is_key_down(key_esc)) {                
+                
+                t.read_file(current_example);
+                for (unsigned int i = 1; i <= current_iteration -1; i++){
+                    t.apply();
+                    draw_again();
+                }
 
                 draw_again();
+
             }
 
             if (is_key_going_down(key_right)) {
@@ -128,7 +141,6 @@ namespace octet {
 
             }
 
-
             if (is_key_down(key_up))
             {
                 app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -0.50f));
@@ -143,15 +155,28 @@ namespace octet {
 
                 if (current_iteration) {
                     t.read_file(current_example);
-                    add_angle += 1.25f;
+                    add_angle += 1.5f;
                     for (unsigned int i = 1; i <= current_iteration; i++){
-                        t.iterate();
+                        t.apply();
                         draw_again();
                     }
                 }
                 
             }
 
+            //decrease angle at current iteration
+            if (is_key_down(key_f2)) {
+
+                if (current_iteration) {
+                    t.read_file(current_example);
+                    add_angle -= 1.5f;
+                    for (unsigned int i = 1; i <= current_iteration; i++){
+                        t.apply();
+                        draw_again();
+                        }
+                    }
+                }
+            
         }
 
         void draw_again(){
