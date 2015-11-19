@@ -102,7 +102,7 @@ namespace octet {
             read_lsystem_data(file_content);
         }
 
-        void iterate() {
+        void apply() {
             dynarray<char> new_axiom;
             for (unsigned int i = 0; i < axiom.size(); ++i) {
                 if (is_char_in_array(axiom[i], variables)) {
