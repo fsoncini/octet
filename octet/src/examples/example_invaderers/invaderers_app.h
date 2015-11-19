@@ -758,6 +758,17 @@ namespace octet {
                     }
                 }
             }
+           
+            if (isBossJumping) {
+                boss_sprite.translate(0.0f, boss_speed);
+                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+                    if (boss_sprite.collides_with(map_sprite_background[i])) {
+                        boss_sprite.translate(0.0f, -boss_speed);
+                        bossJumpFrameCount = 0;
+                        canBossJump = true;
+                    }
+                }
+            }
 
             //make sir arthur ("ship") jump back when he loses his armor
             if (boss_sprite.collides_with(sprites[ship_sprite])) {
