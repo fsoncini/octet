@@ -48,8 +48,18 @@ namespace octet {
 
         material *material_wood;
         material *material_leaf;
-
+        material *material_autumn_leaf;
         int current_example = 1;//create a function to change this. 
+        int current_iteration = 1;
+        int n = 0;
+        const int min_example = 1;
+        const int MAX_example = 3;
+
+
+        float far_plane = 500.0f;
+        float add_angle = 0.0f;
+
+
 
     public:
         lsystems(int argc, char **argv) : app(argc, argv) {
@@ -65,6 +75,7 @@ namespace octet {
 
             material_wood = new material(vec4(0.59f, 0.29f, 0.0f, 1.0f));//brown wood
             material_leaf = new material(vec4(0.0f, 0.4f, 0.0f, 1.0f)); //green leaf
+            material_autumn_leaf = new material(vec4(0.47f, 0.06f, 0.19f, 1.0f));//autumn leaf
 
             create_geometry();
         }
@@ -83,16 +94,12 @@ namespace octet {
             app_scene->render((float)w / h);
         }
 
-        int n = 0;
-        const int min_example = 1;
-        const int MAX_example = 3;
-
-        float far_plane = 500.0f;
+     
 
         void handle_input() {
             if (is_key_going_down(key_space)) {
                 t.iterate();
-                ++n;
+                ++current_iteration;
 
 
                 draw_again();
@@ -130,6 +137,21 @@ namespace octet {
             {
                 app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.50f));
             }
+
+            if (is_key_down(key_f1)) {
+
+                if (current_iteration) {
+                    t.read_file(current_example);
+                    add_angle += 1.25f;
+                    for (unsigned int i = 1; i <= current_iteration; i++){
+                        t.iterate();
+                        draw_again();
+                    }
+                }
+                
+            }
+
+    
 
 
         }
@@ -175,28 +197,32 @@ namespace octet {
                 app_scene->add_mesh_instance(new mesh_instance(node, box, material_wood));
             }
             else {
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_leaf));
+                app_scene->add_mesh_instance(new mesh_instance(node, box, material_autumn_leaf));
             }
 
             return end_pos;
         }
 
+        
+
         void create_geometry() {
             dynarray<char> axiom = t.get_axiom();
             vec3 pos = vec3(0.0f, 0.0f, 0.0f);
             float angle = 0.0f;
+           
+
             for (unsigned int i = 0; i < axiom.size(); ++i) {
                 if (axiom[i] == '+') {
 
                     //std::cout << "\Angle: " << angle << "\n";//check
                     switch (current_example)
                     {
-                    case 1: angle += 25.7f;
+                    case 1: angle += 25.7f + add_angle;
                         break;
 
-                    case 2: angle += 20.0f;
+                    case 2: angle += 20.0f + add_angle;
                         break;
-                    case 3: angle += 22.5f;
+                    case 3: angle += 22.5f + add_angle;
                         break;
                     }
                 }
