@@ -83,10 +83,10 @@ namespace octet {
             }
         }
 
-        bool is_char_in_array(char c, dynarray<char> arr) {
+        bool is_char_in_array(char c, dynarray<char> arr) { 
             for (unsigned int i = 0; i < arr.size(); ++i) {
                 if (arr[i] == c) {
-                    return true;
+                    return true;//exit early
                 }
             }
             return false;
@@ -101,7 +101,7 @@ namespace octet {
 
             read_lsystem_data(file_content);
         }
-
+        //fromer iterate()
         void apply() {
             dynarray<char> new_axiom;
             for (unsigned int i = 0; i < axiom.size(); ++i) {

@@ -53,12 +53,13 @@ namespace octet {
         material *material_pastel_green;
         material *material_ocra;
 
-        int current_example = 1;//create a function to change this. 
+        int current_example = 1; 
         int current_iteration = 0;
         int n = 1; // color index here?
         const int min_example = 1;
         const int MAX_example = 8;
-
+        const int min_iteration = 0;
+        const int MAX_iteration = 7;//is it right?
 
         float far_plane = 500.0f;
         float add_angle = 0.0f;
@@ -101,6 +102,7 @@ namespace octet {
             app_scene->render((float)w / h);
         }
 
+        
      
 
         void handle_input() {
@@ -127,18 +129,20 @@ namespace octet {
                               
             }
 
-            if (is_key_going_down(key_f12)) {
+            if (is_key_going_down(key_f11)) {
                 if (current_example < MAX_example)
                 {
+                    current_iteration = min_iteration;
                     ++current_example;
                     t.read_file(current_example);
+                    
 
                     draw_again();
                     std::cout << "\ncurrent example: " << current_example << "\n";// check
                 }
             }
 
-            if (is_key_going_down(key_f11)) {
+            if (is_key_going_down(key_f10)) {
                 if (current_example > min_example)
                 {
                     --current_example;
