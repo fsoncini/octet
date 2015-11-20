@@ -1,10 +1,12 @@
+#include <math.h>
+
 namespace octet {
     class tree : public resource {
 
         dynarray<char> variables;
         dynarray<char> constants;
         dynarray<char> axiom;
-        hash_map<char, dynarray<char>> rules;
+        hash_map<char, dynarray<char>> rules; 
 
         // store data from text file in variables
         void read_lsystem_data(dynarray<uint8_t> file_content) {
@@ -66,10 +68,37 @@ namespace octet {
             ++cursor;
 
             // get rules
+           
             while (cursor < clean_data.size()) {
                 char key = clean_data[cursor];
-                cursor += 3;
+                //stochastic experiment
+       /*         float random = (float)((rand() % 10)*0.1) * 3;
+                int i = 0;
+                for (i = 1; i < 3; i++)
+                {
+                    if (random < i) break;
+                }
 
+                switch (i)
+                {
+                case 1:
+                    cursor += 3;
+                    break;
+                case 2:
+                    cursor += 18;
+
+                    break;
+                case 3:
+                    cursor += 28;
+
+                    break;
+                }*/
+
+                cursor += 3;
+                
+               
+             
+               
                 for (; cursor < clean_data.size(); ++cursor) {
                     char current_char = clean_data[cursor];
                     if (current_char == ';') {
@@ -86,7 +115,7 @@ namespace octet {
         bool is_char_in_array(char c, dynarray<char> arr) { 
             for (unsigned int i = 0; i < arr.size(); ++i) {
                 if (arr[i] == c) {
-                    return true;//exit early
+                    return true;
                 }
             }
             return false;
@@ -101,7 +130,7 @@ namespace octet {
 
             read_lsystem_data(file_content);
         }
-        //fromer iterate()
+
         void apply() {
             dynarray<char> new_axiom;
             for (unsigned int i = 0; i < axiom.size(); ++i) {

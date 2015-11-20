@@ -311,7 +311,9 @@ namespace octet {
                     case 6: angle += (22.5f + add_angle);
                         break;
                     case 7: angle += (90.0f + add_angle);
-                                             
+                        break;
+                    case 8: angle += (25.7f + add_angle);
+                        break;                                             
                     }
                 }
                 else if (axiom[i] == '-') {
@@ -333,8 +335,9 @@ namespace octet {
                     case 6: angle -= (22.5f + add_angle);
                         break;
                     case 7: angle -= (90.0f + add_angle);
-
-
+                        break;
+                    case 8: angle -= (25.7f + add_angle);
+                        break;
                     }
                 }
                 else if (axiom[i] == '[') {

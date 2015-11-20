@@ -13,6 +13,8 @@
 
 #include "Lsystem.h"
 
+#include <math.h>
+
 
 
 /// Create a box with octet
@@ -26,6 +28,9 @@ int main(int argc, char **argv) {
 
   // open windows
   octet::app::run_all_apps();
+
+  srand(time(NULL));
+  float random = (float)((rand() % 10)*0.1);
 }
 
 
