@@ -49,11 +49,15 @@ namespace octet {
         material *material_wood;
         material *material_leaf;
         material *material_autumn_leaf;
+        material *material_acqua;
+        material *material_pastel_green;
+        material *material_ocra;
+
         int current_example = 1;//create a function to change this. 
         int current_iteration = 0;
-        //int n = 0;
+        int n = 1; // color index here?
         const int min_example = 1;
-        const int MAX_example = 6;
+        const int MAX_example = 8;
 
 
         float far_plane = 500.0f;
@@ -76,6 +80,9 @@ namespace octet {
             material_wood = new material(vec4(0.59f, 0.29f, 0.0f, 1.0f));//brown wood
             material_leaf = new material(vec4(0.0f, 0.4f, 0.0f, 1.0f)); //green leaf
             material_autumn_leaf = new material(vec4(0.47f, 0.06f, 0.19f, 1.0f));//autumn leaf
+            material_acqua = new material(vec4(0.38f, 0.89f, 0.87f, 1.0f));//acqua
+            material_pastel_green = new material(vec4(0.02f, 0.97f, 0.42f, 1.0f));//pastel green
+            material_ocra = new material(vec4(0.94f, 0.78f, 0.08f, 1.0f));//ocra yellow
 
             create_geometry();
         }
@@ -99,11 +106,12 @@ namespace octet {
         void handle_input() {
             //add iterations   
             
-            if (is_key_going_down(key_space)) {
-                ++current_iteration;
-                t.apply();                  
-                draw_again();               
-                std::cout << "current iteration: " << current_iteration << "\n";
+            if (is_key_going_down(key_space)) {             
+                    ++current_iteration;
+                    t.apply();
+                    draw_again();
+                    std::cout << "current iteration: " << current_iteration << "\n";                
+            
             }
 
             //reverse iterations
@@ -119,7 +127,7 @@ namespace octet {
                               
             }
 
-            if (is_key_going_down(key_right)) {
+            if (is_key_going_down(key_f12)) {
                 if (current_example < MAX_example)
                 {
                     ++current_example;
@@ -130,7 +138,7 @@ namespace octet {
                 }
             }
 
-            if (is_key_going_down(key_left)) {
+            if (is_key_going_down(key_f11)) {
                 if (current_example > min_example)
                 {
                     --current_example;
@@ -142,14 +150,25 @@ namespace octet {
 
             }
 
-            if (is_key_down(key_up))
-            {
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -0.50f));
+            //zoom in
+            if (is_key_down(key_up)){
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -1.50f));          
             }
-            if (is_key_down(key_down))
-            {
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.50f));
+            //zoom out
+            if (is_key_down(key_down)) {
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 2.0f));
             }
+
+            //move right
+            if (is_key_down(key_right)) {
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(1.0f, 0, 0.0f)); 
+            }
+
+            //move left
+            if (is_key_down(key_left)) {
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(-1.0f, 0, 0.0f));
+            }
+
 
             //increase angle at current iteration
             if (is_key_down(key_f1)) {
@@ -177,6 +196,11 @@ namespace octet {
                         }
                     }
                 }
+
+            //if (current_iteration > 4) {
+            //    app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 1.50f)); //fix this here
+            //    
+            //}
             
         }
 
@@ -212,18 +236,50 @@ namespace octet {
             mtw.loadIdentity();
             mtw.translate(mid_pos);
             mtw.rotate(angle, 0.0f, 0.0f, 1.0f);
-            mesh_box *box = new mesh_box(vec3(SEGMENT_WIDTH, SEGMENT_LENGTH, SEGMENT_WIDTH), mtw);
+
+            
+            mat4t mtw2;
+            mtw2.loadIdentity();
+            mtw2.rotate(90, 1, 0, 0);
+            //mesh_box *box = new mesh_box(vec3(SEGMENT_WIDTH, SEGMENT_LENGTH, SEGMENT_WIDTH), mtw);
+            mesh_cylinder *box = new mesh_cylinder(zcylinder(vec3(0), SEGMENT_WIDTH, SEGMENT_LENGTH), mtw2*mtw);
 
             scene_node *node = new scene_node();
             app_scene->add_child(node);
-
-            if (current_iteration < 4){
+            
+            if (current_iteration == 1) {
                 app_scene->add_mesh_instance(new mesh_instance(node, box, material_wood));
             }
-            else {
+
+            if (current_iteration == 2) {
+                app_scene->add_mesh_instance(new mesh_instance(node, box, material_leaf));
+            }
+
+            if (current_iteration == 3) {
                 app_scene->add_mesh_instance(new mesh_instance(node, box, material_autumn_leaf));
             }
 
+            if (current_iteration == 4) {
+                app_scene->add_mesh_instance(new mesh_instance(node, box, material_acqua));
+            }
+
+            if (current_iteration == 5) {
+                app_scene->add_mesh_instance(new mesh_instance(node, box, material_pastel_green));
+            }
+
+            if (current_iteration == 6) {
+                app_scene->add_mesh_instance(new mesh_instance(node, box, material_ocra));
+            }
+
+
+
+         /*   if (current_iteration < 4){
+                app_scene->add_mesh_instance(new mesh_instance(node, box, material_wood));
+            }
+            else {
+                app_scene->add_mesh_instance(new mesh_instance(node, box, material_ocra));
+            }
+*/
             return end_pos;
         }
 
@@ -249,6 +305,9 @@ namespace octet {
                     case 5: angle += (25.7f + add_angle);
                         break;
                     case 6: angle += (22.5f + add_angle);
+                        break;
+                    case 7: angle += (90.0f + add_angle);
+                                             
                     }
                 }
                 else if (axiom[i] == '-') {
@@ -268,6 +327,8 @@ namespace octet {
                     case 5: angle -= (25.7f + add_angle);
                         break;
                     case 6: angle -= (22.5f + add_angle);
+                        break;
+                    case 7: angle -= (90.0f + add_angle);
 
 
                     }
@@ -282,9 +343,17 @@ namespace octet {
                     angle = n.get_angle();
                     pos = n.get_pos();
                 }
+
+                /*else if (axiom[i] == 'A') {
+                    
+                    current_iteration = 4;
+                }*/
+
                 else if (axiom[i] == 'F') {
                     pos = draw_segment(pos, angle);
                 }
+   
+
             }
         }
 
