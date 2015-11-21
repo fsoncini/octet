@@ -256,7 +256,7 @@ namespace octet {
         dynarray<sprite> map_sprite_background;
         dynarray<sprite> invaderers;
         dynarray<sprite> vampires;
-        dynarray<sprite> coins;
+        //dynarray<sprite> coins; possibly i dont need it here fix
         sprite bg_sprite;
         sprite boss_key;
 
@@ -306,7 +306,8 @@ namespace octet {
             }
         }
 
-        //Called to initialize the background and borders maps from the CSV file
+       
+        //called to initialize the background and borders maps from the CSV file
         void setup_visual_map() {
 
             GLuint bush = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass.gif");
@@ -344,8 +345,7 @@ namespace octet {
                 }
             }
         }
-
-
+         
 
         // called when we hit an enemy
         void on_hit_invaderer() {
@@ -725,7 +725,6 @@ namespace octet {
        //make boss move, jump and attack
         void move_boss() {
             const float boss_speed = 0.02f;
-
             float distance = sprites[ship_sprite].get_position().x() - boss_sprite.get_position().x();
             if (distance < 0.0f) {
                 boss_sprite.is_facing_right() = false;
@@ -735,7 +734,7 @@ namespace octet {
                     if (boss_sprite.collides_with(map_sprite_background[i])) {
                         boss_sprite.translate(boss_speed, 0.0f);
                         bossJumpFrameCount = 0;
-                        canBossJump = false;
+                        canBossJump = true;
                     }
                 }
             }
@@ -786,7 +785,7 @@ namespace octet {
                     if (boss_sprite.collides_with(map_sprite_background[i])) {
                         boss_sprite.translate(0.0f, -boss_speed);
                         bossJumpFrameCount = 0;
-                        canBossJump = false; //here
+                        canBossJump = true; //here
                     }
                 }
               
