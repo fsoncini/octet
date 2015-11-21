@@ -588,7 +588,7 @@ namespace octet {
                     }
                     else {
                         if (missile.collides_with(boss_sprite)) {
-                            sprites[first_missile_sprite].translate(0, -20); //fix
+                            sprites[first_missile_sprite].translate(0, -20);
                             on_hit_boss();
                         }
                     }
