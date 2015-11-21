@@ -200,6 +200,7 @@ namespace octet {
             // sprite definitions
             ship_sprite = 0,
             game_over_sprite,
+            you_win_sprite,
 
             first_missile_sprite,
             last_missile_sprite = first_missile_sprite + num_missiles - 1,
@@ -383,9 +384,11 @@ namespace octet {
             alSourcePlay(source);
 
             if (--boss_lives == 0) {
+                boss_sprite.translate(0.0f, -20);
                 game_over = true;
-                float dx = bg_sprite.get_position().x() - sprites[game_over_sprite].get_position().x();
-                sprites[game_over_sprite].translate(dx, 0);
+                float dx = bg_sprite.get_position().x() - sprites[you_win_sprite].get_position().x();
+                sprites[you_win_sprite].translate(dx, 0);
+                sprites[ship_sprite].translate(0.0f, -20);
             }
         }
 
@@ -956,6 +959,9 @@ namespace octet {
 
             GLuint GameOver = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/GameOver.gif");
             sprites[game_over_sprite].init(GameOver, 20, 0, 3, 1.5f);
+
+            GLuint YouWin = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/lancelot.gif");
+            sprites[you_win_sprite].init(YouWin, 20, 0, 6, 4.0f);
 
             // use the missile texture
             GLuint missile = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile_horizontal.gif");
