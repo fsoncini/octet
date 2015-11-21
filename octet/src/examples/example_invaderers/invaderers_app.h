@@ -308,6 +308,7 @@ namespace octet {
 
        
         //called to initialize the background and borders maps from the CSV file
+        //just to check where i am
         void setup_visual_map() {
 
             GLuint bush = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass.gif");
