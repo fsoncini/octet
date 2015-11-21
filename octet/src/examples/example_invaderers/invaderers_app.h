@@ -588,6 +588,7 @@ namespace octet {
                     }
                     else {
                         if (missile.collides_with(boss_sprite)) {
+                            sprites[first_missile_sprite].translate(0, -20); //fix
                             on_hit_boss();
                         }
                     }
@@ -726,11 +727,28 @@ namespace octet {
             if (distance < 0.0f) {
                 boss_sprite.is_facing_right() = false;
                 boss_sprite.translate(-boss_speed, 0.0f);
+                //here this piece of code below (seems ok now)
+                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+                    if (boss_sprite.collides_with(map_sprite_background[i])) {
+                        boss_sprite.translate(boss_speed, 0.0f);
+                        bossJumpFrameCount = 0;
+                        canBossJump = false;
+                    }
+                }
             }
             else {
                 boss_sprite.is_facing_right() = true;
                 boss_sprite.translate(boss_speed, 0.0f);
-            }
+                //here more tentative piece of code
+                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+                    if (boss_sprite.collides_with(map_sprite_background[i])) {
+                        boss_sprite.translate(-boss_speed, 0.0f);
+                        bossJumpFrameCount = 0;
+                        canBossJump = true;
+                    }
+                }
+            }       
+
 
             if (canBossJump && !isBossJumping) {
                 float jumpProb = randomizer.get(0.0f, 100.0f);
@@ -765,10 +783,12 @@ namespace octet {
                     if (boss_sprite.collides_with(map_sprite_background[i])) {
                         boss_sprite.translate(0.0f, -boss_speed);
                         bossJumpFrameCount = 0;
-                        canBossJump = true;
+                        canBossJump = false; //here
                     }
                 }
+              
             }
+       
 
             //make sir arthur ("ship") jump back when he loses his armor
             if (boss_sprite.collides_with(sprites[ship_sprite])) {
