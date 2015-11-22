@@ -201,7 +201,6 @@ namespace octet {
             ship_sprite = 0,
             game_over_sprite,
             you_win_sprite,
-            skull_sprite,
 
             first_missile_sprite,
             last_missile_sprite = first_missile_sprite + num_missiles - 1,
