@@ -191,7 +191,7 @@ namespace octet {
         federico_shader federico_shader_;
 
         enum {
-            num_sound_sources = 8,
+            num_sound_sources = 8, //changed from 8 to 9 for boss music and back to 8
             num_missiles = 2,
             num_bombs = 2,
             num_borders = 4,
@@ -201,6 +201,7 @@ namespace octet {
             ship_sprite = 0,
             game_over_sprite,
             you_win_sprite,
+            skull_sprite,
 
             first_missile_sprite,
             last_missile_sprite = first_missile_sprite + num_missiles - 1,
@@ -234,6 +235,7 @@ namespace octet {
         // sounds
         ALuint whoosh;
         ALuint bang;
+        //ALuint boss_music;
         unsigned cur_source;
         ALuint sources[num_sound_sources];
 
@@ -337,7 +339,8 @@ namespace octet {
 
             GLuint bush = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass.gif");
             GLuint invaderer = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/invaderer.gif");
-            GLuint vampire = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/vampire.gif");
+            GLuint vampire = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/vampire.gif"); 
+            GLuint skull = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/skull.gif");
 
             for (int i = 0; i < map_height; ++i) {
                 for (int j = 0; j < map_width; ++j) {
@@ -365,7 +368,7 @@ namespace octet {
                         vampires.push_back(s);
                     }
                     else if (map[i][j] == 5) {
-                        boss_key.init(invaderer, -3 + 0.15f + 0.3f*j, 3 - 0.12f - 0.3f*i, 0.3f, 0.3f);
+                        boss_key.init(skull, -3 + 0.15f + 0.3f*j, 3 - 0.12f - 0.3f*i, 0.3f, 0.3f); 
                     }
                 }
             }
@@ -374,7 +377,7 @@ namespace octet {
         //set up visual map for boss level
         void setup_visual_map2() {
             GLuint bush2 = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass2.gif");
-
+                                  
             for (int i = 0; i < map_height; ++i) {
                 for (int j = 0; j < map_width; ++j) {
 
@@ -424,7 +427,10 @@ namespace octet {
             if (--num_lives == 0) {
                 game_over = true;
                 float dx = bg_sprite.get_position().x() - sprites[game_over_sprite].get_position().x();
+                sprites[ship_sprite].translate(0, -20);
                 sprites[game_over_sprite].translate(dx, 0);
+               
+                
             }
         }
 
@@ -441,6 +447,7 @@ namespace octet {
                 sprites[ship_sprite].translate(0.0f, -20);
             }
         }
+
 
         // use the keyboard to move the ship left, right, up and down
 
@@ -1046,8 +1053,8 @@ namespace octet {
             sprites[game_over_sprite].init(GameOver, 20, 0, 3, 1.5f);
 
             GLuint YouWin = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/lancelot.gif");
-            sprites[you_win_sprite].init(YouWin, 20, 0, 6, 4.0f);
-
+            sprites[you_win_sprite].init(YouWin, 20, 0, 6, 4.0f);          
+           
             // use the missile texture
             GLuint missile = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/missile_horizontal.gif");
             for (int i = 0; i != num_missiles; ++i) {
@@ -1074,6 +1081,7 @@ namespace octet {
             // sounds
             whoosh = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/whoosh.wav");
             bang = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
+            //boss_music = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/boss_music.wav");
             cur_source = 0;
             alGenSources(num_sound_sources, sources);
 
@@ -1127,10 +1135,12 @@ namespace octet {
                 move_boss_missiles();
 
                 give_armor();
+
             }
             
         }
 
+    
         // this is called to draw the world
         void draw_world(int x, int y, int w, int h) {
             simulate();
@@ -1160,11 +1170,10 @@ namespace octet {
             else {
                 bg_sprite.render(federico_shader_, cameraToWorld, vec4(50.0 / 255.0, 14.0 / 255.0, 80.0 / 255.0, 1.0));
             }
-
             //end level boss fight
             if (boss_key.is_enabled());
             boss_key.render(texture_shader_, cameraToWorld);
-
+            
 
             //draw the map sprites (border)
             if (!isBossEnabled) {
@@ -1227,7 +1236,7 @@ namespace octet {
                     GLuint ship_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_flipped.gif");
                     GLuint ship2 = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_naked.gif");
                     GLuint ship2_left = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/sir_arthur_naked_flipped.gif");
-
+                    
                     if (sprites[i].is_facing_right()) {
                         if (num_lives > 1)
                             sprites[i].swap_sprite(ship);
@@ -1263,9 +1272,11 @@ namespace octet {
                 draw_text(texture_shader_, sprites[ship_sprite].get_position().x() - 1.75f, 2, 1.0f / 256, score_text);
             }
 
+          
             // move the listener with the camera
             vec4 &cpos = cameraToWorld.w();
             alListener3f(AL_POSITION, cpos.x(), cpos.y(), cpos.z());
         }
+
     };
 }
