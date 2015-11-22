@@ -333,7 +333,6 @@ namespace octet {
         }
        
         //called to initialize the background and borders maps from the CSV file
-        //just to check where i am
         void setup_visual_map() {
 
             GLuint bush = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass.gif");
@@ -451,9 +450,18 @@ namespace octet {
             if (isJumping && jumpFrameCount <= 20) {
                 sprites[ship_sprite].translate(0, ship_speed);
                 ++jumpFrameCount;
-                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
-                    if (sprites[ship_sprite].collides_with(map_sprite_background[i])) {
-                        isJumping = false;
+                if (!isBossEnabled) {
+                    for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+                        if (sprites[ship_sprite].collides_with(map_sprite_background[i])) {
+                            isJumping = false;
+                        }
+                    }
+                }
+                if (isBossEnabled) {
+                    for (unsigned int i = 0; i < map_sprite_background2.size(); ++i) {
+                        if (sprites[ship_sprite].collides_with(map_sprite_background2[i])) {
+                            isJumping = false;
+                        }
                     }
                 }
             }
@@ -464,25 +472,43 @@ namespace octet {
                 
             if (!isJumping) {
                 sprites[ship_sprite].translate(0, -ship_speed);
-                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
-                    if (sprites[ship_sprite].collides_with(map_sprite_background[i])) {
-                        sprites[ship_sprite].translate(0, ship_speed);
-                        jumpFrameCount = 0;
-                        canJump = true;
+                if (!isBossEnabled) {
+                    for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+                        if (sprites[ship_sprite].collides_with(map_sprite_background[i])) {
+                            sprites[ship_sprite].translate(0, ship_speed);
+                            jumpFrameCount = 0;
+                            canJump = true;
+                        }
+                    }
+                }
+                if (isBossEnabled) {
+                    for (unsigned int i = 0; i < map_sprite_background2.size(); ++i) {
+                        if (sprites[ship_sprite].collides_with(map_sprite_background2[i])) {
+                            sprites[ship_sprite].translate(0, ship_speed);
+                            jumpFrameCount = 0;
+                            canJump = true;
+                        }
                     }
                 }
             }
 
             if (is_key_down(key_left)) {
-
                 sprites[ship_sprite].translate(-ship_speed, 0);
                 sprites[ship_sprite].is_facing_right() = false;
 
-                for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
-
-                    if (sprites[ship_sprite].collides_with(map_sprite_background[i])){
-                        sprites[ship_sprite].translate(+ship_speed, 0);
+                if (!isBossEnabled) {
+                    for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
+                        if (sprites[ship_sprite].collides_with(map_sprite_background[i])){
+                            sprites[ship_sprite].translate(+ship_speed, 0);
+                        }
                     }
+                }
+                if (isBossEnabled) {
+                    for (unsigned int i = 0; i < map_sprite_background2.size(); i++) {
+                        if (sprites[ship_sprite].collides_with(map_sprite_background2[i])){
+                            sprites[ship_sprite].translate(+ship_speed, 0);
+                        }
+                    }                
                 }
             }
 
@@ -491,12 +517,19 @@ namespace octet {
                 sprites[ship_sprite].translate(+ship_speed, 0);
                 sprites[ship_sprite].is_facing_right() = true;
 
-                for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
-
-                    if (sprites[ship_sprite].collides_with(map_sprite_background[i])) {
-                        sprites[ship_sprite].translate(-ship_speed, 0);
+                if (!isBossEnabled) {
+                    for (unsigned int i = 0; i < map_sprite_background.size(); i++) {
+                        if (sprites[ship_sprite].collides_with(map_sprite_background[i])){
+                            sprites[ship_sprite].translate(-ship_speed, 0);
+                        }
                     }
-
+                }
+                if (isBossEnabled) {
+                    for (unsigned int i = 0; i < map_sprite_background2.size(); i++) {
+                        if (sprites[ship_sprite].collides_with(map_sprite_background2[i])){
+                            sprites[ship_sprite].translate(-ship_speed, 0);
+                        }
+                    }                
                 }
 
             }
@@ -775,8 +808,8 @@ namespace octet {
                 boss_sprite.is_facing_right() = false;
                 boss_sprite.translate(-boss_speed, 0.0f);
                 //here this piece of code below (seems ok now)
-                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
-                    if (boss_sprite.collides_with(map_sprite_background[i])) {
+                for (unsigned int i = 0; i < map_sprite_background2.size(); ++i) {
+                    if (boss_sprite.collides_with(map_sprite_background2[i])) {
                         boss_sprite.translate(boss_speed, 0.0f);
                         bossJumpFrameCount = 0;
                         canBossJump = true;
@@ -787,8 +820,8 @@ namespace octet {
                 boss_sprite.is_facing_right() = true;
                 boss_sprite.translate(boss_speed, 0.0f);
                 //here more tentative piece of code
-                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
-                    if (boss_sprite.collides_with(map_sprite_background[i])) {
+                for (unsigned int i = 0; i < map_sprite_background2.size(); ++i) {
+                    if (boss_sprite.collides_with(map_sprite_background2[i])) {
                         boss_sprite.translate(-boss_speed, 0.0f);
                         bossJumpFrameCount = 0;
                         canBossJump = true;
@@ -815,8 +848,8 @@ namespace octet {
 
             if (!isBossJumping) {
                 boss_sprite.translate(0.0f, -boss_speed);
-                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
-                    if (boss_sprite.collides_with(map_sprite_background[i])) {
+                for (unsigned int i = 0; i < map_sprite_background2.size(); ++i) {
+                    if (boss_sprite.collides_with(map_sprite_background2[i])) {
                         boss_sprite.translate(0.0f, boss_speed);
                         bossJumpFrameCount = 0;
                         canBossJump = true;
@@ -826,8 +859,8 @@ namespace octet {
            
             if (isBossJumping) {
                 boss_sprite.translate(0.0f, boss_speed);
-                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
-                    if (boss_sprite.collides_with(map_sprite_background[i])) {
+                for (unsigned int i = 0; i < map_sprite_background2.size(); ++i) {
+                    if (boss_sprite.collides_with(map_sprite_background2[i])) {
                         boss_sprite.translate(0.0f, -boss_speed);
                         bossJumpFrameCount = 0;
                         canBossJump = true; //here
@@ -916,8 +949,8 @@ namespace octet {
                         on_hit_ship();
                         goto next_boss_bomb;
                     }
-                    for (unsigned int j = 0; j < map_sprite_background.size(); ++j) {
-                        if (bomb.collides_with(map_sprite_background[j])) {
+                    for (unsigned int j = 0; j < map_sprite_background2.size(); ++j) {
+                        if (bomb.collides_with(map_sprite_background2[j])) {
                             bomb.is_enabled() = false;
                             bomb.translate(0, -20);
                         }
