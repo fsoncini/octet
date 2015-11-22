@@ -381,11 +381,17 @@ namespace octet {
                     sprite s;
 
                     if (map2[i][j] == 1) {
-
                         s.init(bush2, -3 + 0.15f + 0.3f*j, 3 - 0.15f - 0.3f*i, 0.3f, 0.3f);
                         map_sprite_background2.push_back(s);
                         //num_bush++;
                     }
+
+                    else if (map2[i][j] == 2) {
+                        s.init(bush2, -3 + 0.15f + 0.3f*j, 3 - 0.15f - 0.3f*i, 0.3f, 0.3f);
+                        s.is_enabled() = false;
+                        map_sprite_background2.push_back(s);
+                    }
+
                 }
             }
 
@@ -513,7 +519,6 @@ namespace octet {
             }
 
             else if (is_key_down(key_right)) {
-
                 sprites[ship_sprite].translate(+ship_speed, 0);
                 sprites[ship_sprite].is_facing_right() = true;
 
