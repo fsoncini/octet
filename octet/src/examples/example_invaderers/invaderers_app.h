@@ -275,7 +275,7 @@ namespace octet {
         //Endgame stuff
         bool isBossEnabled = false;
         sprite boss_sprite;
-        int boss_lives = 5;
+        int boss_lives = 8;
 
         //set variable to control jump and time withour armour
         bool isBossJumping = false;
