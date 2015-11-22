@@ -253,7 +253,9 @@ namespace octet {
         static const int map_width = 61;
         static const int map_height = 20;
         int map[map_height][map_width];
+        int map2[map_height][map_width];
         dynarray<sprite> map_sprite_background;
+        dynarray<sprite> map_sprite_background2;
         dynarray<sprite> invaderers;
         dynarray<sprite> vampires;
         //dynarray<sprite> coins; possibly i dont need it here fix
@@ -305,7 +307,30 @@ namespace octet {
                 ++i;
             }
         }
+        
+        void read_csv2() {
+            std::ifstream file("background2.csv");
 
+            char buffer[2048];
+            int i = 0;
+
+            while (!file.eof()) {
+                file.getline(buffer, sizeof(buffer));
+
+                char *b = buffer;
+                for (int j = 0;; ++j) {
+                    char *e = b;
+                    while (*e != 0 && *e != ',') ++e;
+
+                    map2[i][j] = std::atoi(b);
+
+                    if (*e != ',') break;
+                    b = e + 1;
+                }
+                ++i;
+            }
+
+        }
        
         //called to initialize the background and borders maps from the CSV file
         //just to check where i am
@@ -347,6 +372,25 @@ namespace octet {
             }
         }
          
+        //set up visual map for boss level
+        void setup_visual_map2() {
+            GLuint bush2 = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass2.gif");
+
+            for (int i = 0; i < map_height; ++i) {
+                for (int j = 0; j < map_width; ++j) {
+
+                    sprite s;
+
+                    if (map2[i][j] == 1) {
+
+                        s.init(bush2, -3 + 0.15f + 0.3f*j, 3 - 0.15f - 0.3f*i, 0.3f, 0.3f);
+                        map_sprite_background2.push_back(s);
+                        //num_bush++;
+                    }
+                }
+            }
+
+        }
 
         // called when we hit an enemy
         void on_hit_invaderer() {
@@ -942,9 +986,12 @@ namespace octet {
 
             //read the Csv
             read_csv();
+            read_csv2();
 
             //initializes background borders 
             setup_visual_map();
+            setup_visual_map2();
+            
 
             // set up the matrices with a camera 5 units from the origin
             cameraToWorld.loadIdentity();
@@ -1075,18 +1122,31 @@ namespace octet {
             else {
                 bg_sprite.render(federico_shader_, cameraToWorld, vec4(50.0 / 255.0, 14.0 / 255.0, 80.0 / 255.0, 1.0));
             }
-            
+
             //end level boss fight
             if (boss_key.is_enabled());
-                boss_key.render(texture_shader_, cameraToWorld); 
-              
+            boss_key.render(texture_shader_, cameraToWorld);
+
 
             //draw the map sprites (border)
-            for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
-                if (map_sprite_background[i].is_enabled()) {
-                    map_sprite_background[i].render(texture_shader_, cameraToWorld);
+            if (!isBossEnabled) {
+                for (unsigned int i = 0; i < map_sprite_background.size(); ++i) {
+                    if (map_sprite_background[i].is_enabled()) {
+                        map_sprite_background[i].render(texture_shader_, cameraToWorld);
+                    }
                 }
             }
+            //draw border 2
+            if (isBossEnabled) {
+                for (unsigned int i = 0; i < map_sprite_background2.size(); ++i) {
+                    if (map_sprite_background2[i].is_enabled()) {
+                        map_sprite_background2[i].render(texture_shader_, cameraToWorld);
+                    }
+                }
+            }
+
+
+
 
             //draws boss and vampires
             if (!isBossEnabled) {
