@@ -191,7 +191,7 @@ namespace octet {
         federico_shader federico_shader_;
 
         enum {
-            num_sound_sources = 8, //changed from 8 to 9 for boss music and back to 8
+            num_sound_sources = 8, 
             num_missiles = 2,
             num_bombs = 2,
             num_borders = 4,
@@ -259,7 +259,7 @@ namespace octet {
         dynarray<sprite> map_sprite_background2;
         dynarray<sprite> invaderers;
         dynarray<sprite> vampires;
-        //dynarray<sprite> coins; possibly i dont need it here fix
+   
         sprite bg_sprite;
         sprite boss_key;
 
@@ -277,6 +277,7 @@ namespace octet {
         sprite boss_sprite;
         int boss_lives = 5;
 
+        //set variable to control jump and time withour armour
         bool isBossJumping = false;
         bool canBossJump = false;
         int bossJumpFrameCount = 0;
@@ -309,6 +310,7 @@ namespace octet {
             }
         }
         
+        //called to read second level map (boss map)
         void read_csv2() {
             std::ifstream file("background2.csv");
 
@@ -333,7 +335,7 @@ namespace octet {
 
         }
        
-        //called to initialize the background and borders maps from the CSV file
+        //called to inizialize elements read from first CSV file
         void setup_visual_map() {
 
             GLuint bush = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass.gif");
@@ -373,7 +375,7 @@ namespace octet {
             }
         }
          
-        //set up visual map for boss level
+        //called to inizialize elements read from second CSV file
         void setup_visual_map2() {
             GLuint bush2 = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/grass2.gif");
                                   
@@ -448,10 +450,8 @@ namespace octet {
         }
 
 
-        // use the keyboard to move the ship left, right, up and down
-
+        // use the keyboard to move the ship left, right and jump
         void move_ship() {
-
             const float ship_speed = 0.05f;
 
             if (is_key_going_down(key_up) && canJump && !isJumping) {
@@ -793,6 +793,7 @@ namespace octet {
                     if (--num_lives == 0) {
                         game_over = true;
                         float dx = bg_sprite.get_position().x() - sprites[game_over_sprite].get_position().x();
+                        sprites[ship_sprite].translate(0, -20);
                         sprites[game_over_sprite].translate(dx, 0);
                     }
                 }
@@ -971,7 +972,7 @@ namespace octet {
             }
         }
 
-        //lets sir Arthur regain armor
+        //lets sir Arthur regain armour
         void give_armor() {
             if (num_lives == 1 && timeWithoutArmor <= 45) {
                 ++timeWithoutArmor;
