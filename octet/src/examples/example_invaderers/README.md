@@ -1,14 +1,14 @@
 ##SIR ARTHUR 'N GOBLINS
 
 The hack is inspired by the popular 1980’s arcade game Ghosts n Goblins, developed by Capcom. It modifies the existing "Example Invaderers" game in 
-the Octet framework. The player controls sir Arthur, a knight in a heavy armor. In the original game he has to rescue a princess from an evil ghoul,
+the Octet framework. The player controls Sir Arthur, a knight in heavy armor. In the original game he has to rescue a princess from an evil ghoul,
 in this version he only gets kudos from other fellow knights if he succeeds in killing one boss.
 
-The game is developed as a simple 2D platformer with two levels. In the first, sir Arthurs faces vampires and a handful of 1970's invaders that shoot 
+The game is developed as a simple 2D platformer with two levels. In the first, Sir Arthur faces vampires and a handful of 1970's invaders that shoot 
 him from above.
 When he makes his way through the level and touches the skull he can enter the second level and fight the boss, who is able to jump up and down and go after him. The second level has a completely different layout than the first, with a ladder over which the player can jump and be better positioned
 to throw missiles at the boss. Instead of going through the entire level and touch the diamond skull sprite, the player could also choose to jump up 
-up some blocks of grass and shoot out the invaders, skipping confrontation with the vampires on the ground. In that case he is granted immediate 
+some blocks of grass and shoot out the invaders, skipping confrontation with the vampires on the ground. In that case he is granted immediate 
 access to the second level and a confrontation with the boss. 
 
 The two levels are drawn and coloured using CSV files and a fragment shader.
@@ -39,13 +39,13 @@ collide with elements of the environment.
 To control the vampires two functions were added: move_vampires(...) and vampire_attack(). The first one, after reading the vampires's position from
 the map, measures the distance between the vampire and the player. When in close range the vampire will start moving in the direction of the player,
 in both directions left or right.
-The function vampire_attack() translates sir Arthur away from the vampire when he is hit, enabling him to loose his amorur without being immediately
+The function vampire_attack() translates Sir Arthur away from the vampire when he is hit, enabling him to loose his amorur without being immediately
 hit again and prompt the game over.
 When the player touches the diamond skull, the condition boss_key.collides_with[ship_sprite] is verified: the method .resize(0) is applied invaderers
 and vampires and the boss sprite is there initialized and drawn.
-Much like in the case of the vampires and sir Arthur, the boss has different sprites associated to wether he is facing right or left. This mechanism 
+Much like in the case of the vampires and Sir Arthur, the boss has different sprites associated to wether he is facing right or left. This mechanism 
 is controlled through a simple mechanism of "if"statements where the method .is_facing_right() is called on the sprites that need this kind of 
-interaction with the environment. When the sprites need to turn the simple method swap_sprite is called and the program substitutes the current with a
+interaction with the environment. When the sprites need to turn, the simple method swap_sprite is called and the program substitutes the current with a
 sprite facing in the opposite direction.
 
 The boss is controlled by the move_boss() function, which incorporates a randomizer float called jumpProb and gives the boss the ability to jump randomly. It kicks in when the conditions canBossJump and !isBossJumping are both verified.
@@ -55,8 +55,8 @@ Most collisions with borders and static elements - the grass sprites - implement
 To enable the scrolling effect the camera was pinned to the sprite bg_sprite, which represents the entirety of the background that is then rendered 
 through the shader.
 
-To let sir Arthur regain his armor after he is hit only once, the function give_armor() was implemented. It is called when the player touches the
-diamond skull and enters the second level and after sir Arthurs spends more than 45 frames without armor. 
+To let Sir Arthur regain his armor after he is hit only once, the function give_armor() was implemented. It is called when the player touches the
+diamond skull and enters the second level and after Sir Arthur spends more than 45 frames without armor. 
 In keeping with the Octet framework rule, when the sprites are hit they are translated off screen and not destroyed and then recreated. 
 
 Finally, when the boss is hit 8 times, a congratulations photo from the film Lancelot du Lac, pops up on the screen.
