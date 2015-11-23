@@ -48,7 +48,6 @@ is controlled through a simple mechanism of "if"statements where the method .is_
 interaction with the environment. When the sprites need to turn the simple method swap_sprite is called and the program substitutes the current with a
 sprite facing in the opposite direction.
 
-
 The boss is controlled by the move_boss() function, which incorporates a randomizer float called jumpProb and gives the boss the ability to jump randomly. It kicks in when the conditions canBossJump and !isBossJumping are both verified.
 The jumping ability of the boss is implemented the same way it was for the player, by translating the sprite up for a time lasting a certain number of frames. In this case the jump was made longer, up to 50 frames, because the sprite is much larger.
 Most collisions with borders and static elements - the grass sprites - implemented with "for" loops checking all the elements of the map.
@@ -70,7 +69,7 @@ Elio De Bernardinis for helping me with setting up the CSV files.
 
 ##DEMO LINK:
 
-
+https://youtu.be/0H2hMr5XJrE
 
 
 
