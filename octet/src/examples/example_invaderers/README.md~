@@ -29,9 +29,6 @@ The shader(federico_shader.h), which was implemented with the help and supervisi
 from Octet's shader class) unmodified and has a render method that colors the tiles according to RGB values. It is used twice for the 
 two different levels with different colors.
 
-The app_init() function initializes the program and call all the above mentioned functions and sets up the texture and fragment shaders with .init
-methods.
-
 The game mechanics is implemented inside the function move_ship(), which contains functions to move the player left and right. The key_up key was
 modified and associated with a function that lets the player jump.
 Implemented without physics, it translates the player up for the time of 20 frames, and then it stops executing until the player returns to
