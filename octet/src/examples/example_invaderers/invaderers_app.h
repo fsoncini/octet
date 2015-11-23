@@ -412,6 +412,7 @@ namespace octet {
             if (live_invaderers == 4) {
                 invader_velocity *= 4;
             }
+            //access boss level if clear all invaderers
             else if (live_invaderers == 0) {
 
                 isBossEnabled = true;
@@ -430,8 +431,8 @@ namespace octet {
                /* float dx = bg_sprite.get_position().x() - sprites[you_win_sprite].get_position().x();
                 sprites[you_win_sprite].translate(dx, 0);
                 sprites[ship_sprite].translate(0.0f, -20);*/
-               /* game_over = true;
-                sprites[game_over_sprite].translate(-20, 0);*/
+               /* game_over = true;*/
+               
             }
         }
 
