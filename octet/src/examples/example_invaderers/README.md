@@ -85,7 +85,6 @@ https://youtu.be/0H2hMr5XJrE
 
 ![Alt text](https://github.com/fsoncini/octet/blob/Intro-to-Programming_assignment_1_final/octet/assets/invaderers/photo5.png?raw=true"Screenshot 5")
 
-![Alt text](https://github.com/fsoncini/octet/blob/Intro-to-Programming_assignment_1_final/octet/assets/invaderers/photo6.png?raw=true"Screenshot 6")
 
 
 
