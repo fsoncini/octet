@@ -6,17 +6,17 @@ in this version he only gets kudos from other fellow knights if he succeeds in k
 
 The game is developed as a simple 2D platformer with two levels. In the first, sir Arthurs faces vampires and a handful of 1970's invaders that shoot 
 him from above.
-When he makes his way through the level and touches the skull he can enter the second level and fight the boss, who is able to jump up and down and go aafter him. The second level has a completely different layout thatn the first, with a ladder over which the player can jump and be better positioned
-to throw missiles at the boss. Instead of going through the entire level and touch the diamond skull sprite, the player could also choose to jumo up 
+When he makes his way through the level and touches the skull he can enter the second level and fight the boss, who is able to jump up and down and go after him. The second level has a completely different layout than the first, with a ladder over which the player can jump and be better positioned
+to throw missiles at the boss. Instead of going through the entire level and touch the diamond skull sprite, the player could also choose to jump up 
 up some blocks of grass and shoot out the invaders, skipping confrontation with the vampires on the ground. In that case he is granted immediate 
 access to the second level and a confrontation with the boss. 
 
 The two levels are drawn and coloured using CSV files and a fragment shader.
 The map from the original invaderers was originally a 20X20 tiles (each tile a 0.3x0.3 square) and it was resized to a larger 61x20 tiles, 
 in order to enable the scrolling platform effect. Each tile is read into an array of int type called map (and map2 for the second CSV
-file) that stores values for height and width of the map. The information relative to position and texture of object that are present in the 
-maps are stored into dynarrays containing "sprite" types, which are called map_sprite_background[map_sprite_background2 for the
-second level], which stores the grass sprites, invaderers and vampires.
+file) that stores values for height and width of the map. The information relative to position and texture of the objects that are present in the 
+maps are stored into dynarrays containing "sprite" types. The containers are called map_sprite_background and map_sprite_background2 for the
+second level, and stores the grass, invaderers and vampires sprites.
 
 The functions read csv() and read csv2() read the CSV files [called background.csv and background.csv2] stored in the assets folder of the 
 example_invaderers file. The functions were implemented following the Octet example suggestions. Through these function calls the content of the
