@@ -413,8 +413,25 @@ namespace octet {
                 invader_velocity *= 4;
             }
             else if (live_invaderers == 0) {
-                game_over = true;
-                sprites[game_over_sprite].translate(-20, 0);
+
+                isBossEnabled = true;
+                invaderers.resize(0);
+                vampires.resize(0);
+                sprite &bomb = sprites[first_bomb_sprite];
+                bomb.translate(0, -20);
+                boss_key.is_enabled() = false;
+
+                GLuint boss = resource_dict::get_texture_handle(GL_RGBA, "assets/invaderers/boss_flipped.gif");
+                float dx = sprites[ship_sprite].get_position().x() + 2.5f;
+                float dy = sprites[ship_sprite].get_position().y() - 2.0f;
+                boss_sprite.init(boss, dx, dy, 1.0f, 1.1f);
+                boss_sprite.is_facing_right() = true;
+                
+               /* float dx = bg_sprite.get_position().x() - sprites[you_win_sprite].get_position().x();
+                sprites[you_win_sprite].translate(dx, 0);
+                sprites[ship_sprite].translate(0.0f, -20);*/
+               /* game_over = true;
+                sprites[game_over_sprite].translate(-20, 0);*/
             }
         }
 
@@ -732,7 +749,7 @@ namespace octet {
             }
         }
 
-        //make vampires move toward sir arthur ("ship")
+        //make vampires move toward sir arthur
         void move_vampires(float dx) {
             const float ship_speed = 0.05f;
 
