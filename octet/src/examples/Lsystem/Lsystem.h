@@ -53,7 +53,7 @@ namespace octet {
         material *material_pastel_green;
         material *material_ocra;
 
-        int current_example = 1; 
+        int current_example = 1;
         int current_iteration = 0;
         int n = 1; // color index here?
         const int min_example = 1;
@@ -63,6 +63,7 @@ namespace octet {
 
         float far_plane = 500.0f;
         float add_angle = 0.0f;
+        float add_width = 0.0f;
 
 
 
@@ -102,40 +103,41 @@ namespace octet {
             app_scene->render((float)w / h);
         }
 
-        
-     
 
+
+        //hotkeys are specified in this function
         void handle_input() {
-            //add iterations   
-            
-            if (is_key_going_down(key_space)) {             
-                    ++current_iteration;
-                    t.apply();
-                    draw_again();
-                    std::cout << "current iteration: " << current_iteration << "\n";                
-            
+
+
+            if (is_key_going_down(key_space)) {
+                ++current_iteration;
+                t.apply();
+                draw_again();
+                std::cout << "current iteration: " << current_iteration << "\n";
+
             }
 
             //reverse iterations
-            if (is_key_down(key_esc)) {                
+            if (is_key_down(key_esc)) {
                 --current_iteration;
                 t.read_file(current_example);
-                for (unsigned int i = 0; i <= current_iteration -1; i++){
+                for (unsigned int i = 0; i <= current_iteration - 1; i++){
                     t.apply();
                     draw_again();
-                }          
+                }
                 std::cout << "current iteration: " << current_iteration << "\n";
-                
-                              
+
+
             }
 
             if (is_key_going_down(key_f11)) {
+                ++current_example;
                 if (current_example < MAX_example)
                 {
                     current_iteration = min_iteration;
-                    ++current_example;
+
                     t.read_file(current_example);
-                    
+
 
                     draw_again();
                     std::cout << "\ncurrent example: " << current_example << "\n";// check
@@ -143,11 +145,12 @@ namespace octet {
             }
 
             if (is_key_going_down(key_f10)) {
+                --current_example;
                 if (current_example > min_example)
                 {
-                    --current_example;
-                    t.read_file(current_example);
 
+                    current_iteration = min_iteration;
+                    t.read_file(current_example);
                     draw_again();
                     std::cout << "\ncurrent example: " << current_example << "\n";//check
                 }
@@ -156,7 +159,7 @@ namespace octet {
 
             //zoom in
             if (is_key_down(key_up)){
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -1.50f));          
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -1.50f));
             }
             //zoom out
             if (is_key_down(key_down)) {
@@ -165,7 +168,7 @@ namespace octet {
 
             //move right
             if (is_key_down(key_right)) {
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(1.0f, 0, 0.0f)); 
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(1.0f, 0, 0.0f));
             }
 
             //move left
@@ -185,8 +188,40 @@ namespace octet {
                         draw_again();
                     }
                 }
-                
+
             }
+
+
+            //increase segment width
+
+            if (is_key_down(key_f8)) {
+
+                if (current_iteration) {
+                    t.read_file(current_example);
+                    add_width += 0.05f;
+                    for (unsigned int i = 1; i <= current_iteration; i++) {
+                        t.apply();
+                        draw_again();
+                    }
+                }
+            }
+
+            //decrease segment width (fix because when it gets to zero it disappears
+
+            if (is_key_down(key_f7)) {
+                //if (current_iteration) 
+                t.read_file(current_example);
+                if (SEGMENT_WIDTH > 0.0f) {
+                    add_width -= 0.05f;
+                    for (unsigned i = 1; i <= current_iteration; i++) {
+                        t.apply();
+                        draw_again();
+                    }
+                }
+            }
+                
+                    
+          
 
             //decrease angle at current iteration
             if (is_key_down(key_f2)) {
@@ -246,7 +281,7 @@ namespace octet {
             mtw2.loadIdentity();
             mtw2.rotate(90, 1, 0, 0);
             //mesh_box *box = new mesh_box(vec3(SEGMENT_WIDTH, SEGMENT_LENGTH, SEGMENT_WIDTH), mtw);
-            mesh_cylinder *box = new mesh_cylinder(zcylinder(vec3(0), SEGMENT_WIDTH, SEGMENT_LENGTH), mtw2*mtw);
+            mesh_cylinder *box = new mesh_cylinder(zcylinder(vec3(0), SEGMENT_WIDTH+add_width, SEGMENT_LENGTH), mtw2*mtw);
 
             scene_node *node = new scene_node();
             app_scene->add_child(node);
