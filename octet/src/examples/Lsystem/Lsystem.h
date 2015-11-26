@@ -171,6 +171,22 @@ namespace octet {
 
             }
 
+            //reset to first launch
+            
+            if (is_key_down(key_f4)) {
+
+                current_example = 1;
+
+                current_iteration = min_iteration;
+                t.read_file(current_example);
+                draw_again();
+                std::cout << "\ncurrent example: " << current_example << "\n";
+
+
+            }
+
+
+
             //zoom in
             if (is_key_down(key_up)){
                 app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -1.50f));
