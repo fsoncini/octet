@@ -54,12 +54,12 @@ namespace octet {
         material *material_ocra;
 
         int current_example = 1;
-        int current_iteration = 0;
+        unsigned int current_iteration = 0;
         int n = 1; // color index here?
         const int min_example = 1;
         const int MAX_example = 8;
-        const int min_iteration = 0;
-        const int MAX_iteration = 7;//is it right?
+        int min_iteration = 0;
+        int max_iteration = 0;
 
         float far_plane = 500.0f;
         float add_angle = 0.0f;
@@ -73,6 +73,23 @@ namespace octet {
 
         void app_init() {
             t.read_file(current_example);
+            if (current_example == 1) {
+                max_iteration = 6;
+            }
+
+            else if (current_example == 2) {
+                max_iteration = 6;
+            }
+
+            else if (current_example == 3) {
+                max_iteration = 4;
+            }
+            else if (current_example == 4) {
+                max_iteration = 7;
+            }
+            
+
+
 
             app_scene = new visual_scene();
             app_scene->create_default_camera_and_lights();
@@ -92,31 +109,32 @@ namespace octet {
         void draw_world(int x, int y, int w, int h) {
 
             handle_input();
-
             app_scene->begin_render(w, h);
-
-            //glClearColor(0, 0, 0, 1);
-            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // changed directly in visual scene (is there another way?)
-
             app_scene->update(1.0f / 30.0f);
-
             app_scene->render((float)w / h);
         }
 
+ 
 
 
         //hotkeys are specified in this function
-        void handle_input() {
-
-
-            if (is_key_going_down(key_space)) {
+        void handle_input() {         
+            
+            if (is_key_going_down(key_space) && current_iteration < max_iteration) {
                 ++current_iteration;
-                t.apply();
-                draw_again();
-                std::cout << "current iteration: " << current_iteration << "\n";
+                if (current_iteration < max_iteration){ 
+                    t.apply();
+                    draw_again();
+                    std::cout << "current iteration: " << current_iteration << "\n";
+                }
+                else if (current_iteration > max_iteration) {
+                    current_iteration = min_iteration;
+                    t.apply();
+                    draw_again();
+                    std::cout << "current iteration: " << current_iteration << "\n";
 
+                }
             }
-
             //reverse iterations
             if (is_key_down(key_esc)) {
                 --current_iteration;
@@ -134,11 +152,8 @@ namespace octet {
                 ++current_example;
                 if (current_example < MAX_example)
                 {
-                    current_iteration = min_iteration;
-
+                    current_iteration = 0;
                     t.read_file(current_example);
-
-
                     draw_again();
                     std::cout << "\ncurrent example: " << current_example << "\n";// check
                 }
@@ -148,8 +163,7 @@ namespace octet {
                 --current_example;
                 if (current_example > min_example)
                 {
-
-                    current_iteration = min_iteration;
+                    current_iteration = 0;
                     t.read_file(current_example);
                     draw_again();
                     std::cout << "\ncurrent example: " << current_example << "\n";//check
@@ -236,6 +250,7 @@ namespace octet {
                     }
                 }
 
+
             //if (current_iteration > 4) {
             //    app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 1.50f)); //fix this here
             //    
@@ -296,14 +311,18 @@ namespace octet {
 
             if (current_iteration == 3) {
                 app_scene->add_mesh_instance(new mesh_instance(node, box, material_autumn_leaf));
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.3f));
+
             }
 
             if (current_iteration == 4) {
                 app_scene->add_mesh_instance(new mesh_instance(node, box, material_acqua));
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.1f));
             }
 
             if (current_iteration == 5) {
                 app_scene->add_mesh_instance(new mesh_instance(node, box, material_pastel_green));
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.03f));
             }
 
             if (current_iteration == 6) {
@@ -322,7 +341,7 @@ namespace octet {
             return end_pos;
         }
 
-        
+
         void create_geometry() {
             dynarray<char> axiom = t.get_axiom();
             vec3 pos = vec3(0.0f, 0.0f, 0.0f);
