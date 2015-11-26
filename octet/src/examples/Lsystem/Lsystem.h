@@ -172,17 +172,12 @@ namespace octet {
             }
 
             //reset to first launch
-            
             if (is_key_down(key_f4)) {
-
                 current_example = 1;
-
                 current_iteration = min_iteration;
                 t.read_file(current_example);
                 draw_again();
                 std::cout << "\ncurrent example: " << current_example << "\n";
-
-
             }
 
 
@@ -226,7 +221,7 @@ namespace octet {
 
             if (is_key_down(key_f8)) {
 
-                if (current_iteration) {
+                if (current_iteration > min_iteration) {
                     t.read_file(current_example);
                     add_width += 0.05f;
                     for (unsigned int i = 1; i <= current_iteration; i++) {
