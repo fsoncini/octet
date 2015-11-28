@@ -45,6 +45,7 @@ namespace octet {
         dynarray<node> node_stack;
 
         float tree_max_y = 0.0f;
+        dynarray <material*> materials;
 
         material *material_wood;
         material *material_leaf;
@@ -52,6 +53,7 @@ namespace octet {
         material *material_acqua;
         material *material_pastel_green;
         material *material_ocra;
+        material *material_red;
 
         int current_example = 1;
         unsigned int current_iteration = 0;
@@ -59,18 +61,18 @@ namespace octet {
         const int min_example = 1;
         const int MAX_example = 8;
         int min_iteration = 0;
-        int max_iteration = 0;
+        int max_iteration = 5;
 
         float far_plane = 500.0f;
         float add_angle = 0.0f;
         float add_width = 0.0f;
 
+        int trunk_counter = 0;
+        bool example_mode = false;
+
         //draw text function. experiment here to fix
 
        
-
-
-
 
     public:
         lsystems(int argc, char **argv) : app(argc, argv) {
@@ -78,22 +80,6 @@ namespace octet {
 
         void app_init() {
             t.read_file(current_example);
-            if (current_example == 1) {
-                max_iteration = 6;
-            }
-
-            else if (current_example == 2) {
-                max_iteration = 6;
-            }
-
-            else if (current_example == 3) {
-                max_iteration = 4;
-            }
-            else if (current_example == 4) {
-                max_iteration = 7;
-            }
-            
-
 
             app_scene = new visual_scene();
             app_scene->create_default_camera_and_lights();
@@ -106,6 +92,16 @@ namespace octet {
             material_acqua = new material(vec4(0.38f, 0.89f, 0.87f, 1.0f));//acqua
             material_pastel_green = new material(vec4(0.02f, 0.97f, 0.42f, 1.0f));//pastel green
             material_ocra = new material(vec4(0.94f, 0.78f, 0.08f, 1.0f));//ocra yellow
+            material_red = new material(vec4(0.94f, 0.03f, 0.20f, 1.0f)); //Santa Claus red
+
+            
+            materials.push_back(material_wood);
+            materials.push_back(material_leaf);
+            materials.push_back(material_autumn_leaf);
+            materials.push_back(material_acqua);
+            materials.push_back(material_pastel_green);
+            materials.push_back(material_ocra);
+            materials.push_back(material_red);
 
             create_geometry();
         }
@@ -119,6 +115,15 @@ namespace octet {
 
         }
 
+        void reset_to_first() {
+            //current_example = 1;
+            current_iteration = min_iteration;
+            t.read_file(current_example);
+            draw_again();
+            std::cout << "\ncurrent example: " << current_example << "\n";
+            std::cout << "\ncurrent iteration: " << current_iteration << "\n";
+
+        }
  
 
 
@@ -127,30 +132,55 @@ namespace octet {
             
             if (is_key_going_down(key_space) && current_iteration < max_iteration) {
                 ++current_iteration;
+
+                //added one to make it reset alright
+                if (current_example == 1) {
+                    max_iteration = 5;
+                }
+                else if (current_example == 2) {
+                    max_iteration = 5;
+                }
+                else if (current_example == 3) {
+                    max_iteration = 4;
+                }
+                else if (current_example == 4) {
+                    max_iteration = 7;
+                }
+                else if (current_example == 5) {
+                    max_iteration = 7;
+                }
+                else if (current_example == 6) {
+                    max_iteration = 5;
+                }
+                else if (current_example == 7) {
+                    max_iteration = 6;
+                }
+
+                
+
                 if (current_iteration < max_iteration){ 
                     t.apply();
                     draw_again();
+                    std::cout << "\ncurrent example: " << current_example << "\n";
                     std::cout << "current iteration: " << current_iteration << "\n";
                 }
-                else if (current_iteration > max_iteration) {
-                    current_iteration = min_iteration;
-                    t.apply();
-                    draw_again();
-                    std::cout << "current iteration: " << current_iteration << "\n";
+                //fix this
+                else if (current_iteration == max_iteration) {
 
+                    
+                    reset_to_first();
+                    std::cout << "\nIteration limit reached. \n";
                 }
             }
             //reverse iterations
-            if (is_key_down(key_esc)) {
+            if (is_key_going_down(key_esc)) {
                 --current_iteration;
                 t.read_file(current_example);
-                for (unsigned int i = 0; i <= current_iteration - 1; i++){
+                for (unsigned int i = 0; i < current_iteration; ++i)
                     t.apply();
-                    draw_again();
-                }
+                 draw_again();
+                
                 std::cout << "current iteration: " << current_iteration << "\n";
-
-
             }
 
             if (is_key_going_down(key_f11)) {
@@ -161,6 +191,11 @@ namespace octet {
                     t.read_file(current_example);
                     draw_again();
                     std::cout << "\ncurrent example: " << current_example << "\n";// check
+                }
+
+                else if (current_example == MAX_example) {
+                    reset_to_first();
+                    
                 }
             }
 
@@ -176,16 +211,10 @@ namespace octet {
 
             }
 
-            //reset to first launch
+            //reset to first launch                        
             if (is_key_down(key_f4)) {
-                current_example = 1;
-                current_iteration = min_iteration;
-                t.read_file(current_example);
-                draw_again();
-                std::cout << "\ncurrent example: " << current_example << "\n";
+             reset_to_first();
             }
-
-
 
             //zoom in
             if (is_key_down(key_up)){
@@ -273,9 +302,14 @@ namespace octet {
                     for (unsigned int i = 1; i <= current_iteration; i++){
                         t.apply();
                         draw_again();
-                        }
                     }
                 }
+            }
+
+            if (is_key_going_down(key_f3)) {
+                example_mode = !example_mode;
+                draw_again();
+            }
 
 
             //if (current_iteration > 4) {
@@ -322,49 +356,20 @@ namespace octet {
             mat4t mtw2;
             mtw2.loadIdentity();
             mtw2.rotate(90, 1, 0, 0);
-            //mesh_box *box = new mesh_box(vec3(SEGMENT_WIDTH, SEGMENT_LENGTH, SEGMENT_WIDTH), mtw);
-            mesh_cylinder *box = new mesh_cylinder(zcylinder(vec3(0), SEGMENT_WIDTH+add_width, SEGMENT_LENGTH), mtw2*mtw);
+            
 
+            mesh_cylinder *box = new mesh_cylinder(zcylinder(vec3(0), SEGMENT_WIDTH + add_width, SEGMENT_LENGTH), mtw2*mtw);
+            
             scene_node *node = new scene_node();
             app_scene->add_child(node);
-            
-            if (current_iteration == 1) {
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_wood));
-            }
 
-            if (current_iteration == 2) {
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_leaf));
-            }
-
-            if (current_iteration == 3) {
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_autumn_leaf));
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.3f));
-
-            }
-
-            if (current_iteration == 4) {
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_acqua));
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.1f));
-            }
-
-            if (current_iteration == 5) {
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_pastel_green));
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 0.03f));
-            }
-
-            if (current_iteration == 6) {
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_ocra));
-            }
-
-
-
-         /*   if (current_iteration < 4){
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_wood));
+            if (example_mode) {
+                app_scene->add_mesh_instance(new mesh_instance(node, box, materials[trunk_counter%materials.size()]));
             }
             else {
-                app_scene->add_mesh_instance(new mesh_instance(node, box, material_ocra));
+                app_scene->add_mesh_instance(new mesh_instance(node, box, materials[current_iteration%materials.size()]));
             }
-*/
+                           
             return end_pos;
         }
 
@@ -424,17 +429,19 @@ namespace octet {
                 else if (axiom[i] == '[') {
                     node n = node(pos, angle);
                     node_stack.push_back(n);
+                    trunk_counter++;
                 }
                 else if (axiom[i] == ']') {
                     node n = node_stack[node_stack.size() - 1];
                     node_stack.pop_back();
                     angle = n.get_angle();
                     pos = n.get_pos();
+                    trunk_counter--;
                 }
 
                 /*else if (axiom[i] == 'A') {
                     
-                    current_iteration = 4;
+                    n = 1;
                 }*/
 
                 else if (axiom[i] == 'F') {
