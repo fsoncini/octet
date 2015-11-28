@@ -60,7 +60,7 @@ namespace octet {
         int n = 1; // color index here?
         const int min_example = 1;
         const int MAX_example = 8;
-        int min_iteration = 1;
+        int min_iteration = 0;
         int max_iteration = 5;
         
 
@@ -112,7 +112,6 @@ namespace octet {
         }
 
         void draw_world(int x, int y, int w, int h) {
-
             handle_input();
             app_scene->begin_render(w, h);
             app_scene->update(1.0f / 30.0f);
@@ -271,20 +270,26 @@ namespace octet {
                         draw_again();
                     }
                 }
-
             }
-
 
             //Rotation (adjust and change)
             if (is_key_down(key_delete))
             {
-
                 for (int i = 0; i < app_scene->get_num_mesh_instances(); ++i) {
                     mesh_instance *mi = app_scene->get_mesh_instance(i);
                     mi->get_node()->rotate(2.0f, vec3(0, 1, 0));
                 }
             }
 
+            //resume here
+            if (is_key_going_down(key_tab))
+            {
+                for (int i = 0; i < app_scene->get_num_mesh_instances(); ++i) {
+                    mesh_instance *mi = app_scene->get_mesh_instance(i);
+                    mi->get_node()->rotate(2.0f, vec3(0, 1, 0));
+                }
+            }
+                
 
             //increase segment width
             if (is_key_down(key_f8)) {
@@ -302,11 +307,21 @@ namespace octet {
             if (is_key_down(key_f7)) {
                 //if (current_iteration) 
                 t.read_file(current_example);
-                if (SEGMENT_WIDTH > 0.0f) {
+                if (SEGMENT_WIDTH > 0.3f) {
                     add_width -= 0.05f;
                     for (unsigned i = 1; i <= current_iteration; i++) {
                         t.apply();
                         draw_again();
+                    }
+                }
+
+                else if (SEGMENT_WIDTH <= 0.3f) {
+                    add_width = 0.0f;
+
+                    for (unsigned int i = 1; i <= current_iteration; i++) {
+                        t.apply();
+                        draw_again();
+                        
                     }
                 }
             }
@@ -458,8 +473,6 @@ namespace octet {
                 else if (axiom[i] == 'F') {
                     pos = draw_segment(pos, angle);
                 }
-   
-
             }
         }
 
