@@ -65,6 +65,11 @@ namespace octet {
         float add_angle = 0.0f;
         float add_width = 0.0f;
 
+        //draw text function. experiment here to fix
+
+       
+
+
 
 
     public:
@@ -90,7 +95,6 @@ namespace octet {
             
 
 
-
             app_scene = new visual_scene();
             app_scene->create_default_camera_and_lights();
             app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.0f, 1.0f));
@@ -112,6 +116,7 @@ namespace octet {
             app_scene->begin_render(w, h);
             app_scene->update(1.0f / 30.0f);
             app_scene->render((float)w / h);
+
         }
 
  
@@ -214,6 +219,17 @@ namespace octet {
                     }
                 }
 
+            }
+
+
+            //Rotation (adjust and change)
+            if (is_key_down(key_delete))
+            {
+
+                for (int i = 0; i < app_scene->get_num_mesh_instances(); ++i) {
+                    mesh_instance *mi = app_scene->get_mesh_instance(i);
+                    mi->get_node()->rotate(2.0f, vec3(0, 1, 0));
+                }
             }
 
 
