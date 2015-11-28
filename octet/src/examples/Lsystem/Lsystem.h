@@ -60,8 +60,9 @@ namespace octet {
         int n = 1; // color index here?
         const int min_example = 1;
         const int MAX_example = 8;
-        int min_iteration = 0;
+        int min_iteration = 1;
         int max_iteration = 5;
+        
 
         float far_plane = 500.0f;
         float add_angle = 0.0f;
@@ -69,6 +70,7 @@ namespace octet {
 
         int trunk_counter = 0;
         bool example_mode = false;
+        
 
         //draw text function. experiment here to fix
 
@@ -104,6 +106,9 @@ namespace octet {
             materials.push_back(material_red);
 
             create_geometry();
+            std::cout << "\ncurrent example: " << min_example << "\n";
+            std::cout << "\ncurrent iteration: " << min_iteration << "\n";
+
         }
 
         void draw_world(int x, int y, int w, int h) {
@@ -115,8 +120,8 @@ namespace octet {
 
         }
 
-        void reset_to_first() {
-            //current_example = 1;
+        //resets example to first iteration
+        void reset_to_first() {           
             current_iteration = min_iteration;
             t.read_file(current_example);
             draw_again();
@@ -124,16 +129,26 @@ namespace octet {
             std::cout << "\ncurrent iteration: " << current_iteration << "\n";
 
         }
+
+        //resets system to initial status
+        void reboot() {
+            current_example = min_example;
+            current_iteration = min_iteration;
+            t.read_file(current_example);
+            draw_again();
+            std::cout << "\ncurrent example: " << min_example << "\n";
+            std::cout << "\ncurrent iteration: " << min_iteration << "\n";
+        }
+
+  
  
-
-
         //hotkeys are specified in this function
         void handle_input() {         
             
             if (is_key_going_down(key_space) && current_iteration < max_iteration) {
                 ++current_iteration;
 
-                //added one to make it reset alright
+                //
                 if (current_example == 1) {
                     max_iteration = 5;
                 }
@@ -144,20 +159,26 @@ namespace octet {
                     max_iteration = 4;
                 }
                 else if (current_example == 4) {
+                    //min_iteration = 0;
                     max_iteration = 7;
                 }
                 else if (current_example == 5) {
+                    //min_iteration = 0;
                     max_iteration = 7;
                 }
                 else if (current_example == 6) {
-                    max_iteration = 5;
+                    //min_iteration = 0;
+                    max_iteration = 7; //one more because of X 
                 }
                 else if (current_example == 7) {
                     max_iteration = 6;
                 }
 
-                
+                else if (current_example == 8) {
+                    max_iteration = 6;
+                }
 
+             
                 if (current_iteration < max_iteration){ 
                     t.apply();
                     draw_again();
@@ -165,9 +186,7 @@ namespace octet {
                     std::cout << "current iteration: " << current_iteration << "\n";
                 }
                 //fix this
-                else if (current_iteration == max_iteration) {
-
-                    
+                else if (current_iteration == max_iteration) {           
                     reset_to_first();
                     std::cout << "\nIteration limit reached. \n";
                 }
@@ -178,28 +197,30 @@ namespace octet {
                 t.read_file(current_example);
                 for (unsigned int i = 0; i < current_iteration; ++i)
                     t.apply();
-                 draw_again();
+                    draw_again();
                 
                 std::cout << "current iteration: " << current_iteration << "\n";
             }
 
+            //move forward through examples 1-8
             if (is_key_going_down(key_f11)) {
                 ++current_example;
-                if (current_example < MAX_example)
-                {
-                    current_iteration = 0;
-                    t.read_file(current_example);
-                    draw_again();
-                    std::cout << "\ncurrent example: " << current_example << "\n";// check
+                if (current_example < MAX_example) {
+                        current_iteration = min_iteration;
+                        t.read_file(current_example);
+                        draw_again();
+                        std::cout << "\ncurrent example: " << current_example << "\n";
+                        std::cout << "\ncurrent iteration: " << min_iteration << "\n";
+            
                 }
 
                 else if (current_example == MAX_example) {
-                    reset_to_first();
-                    
+                    reset_to_first();                  
                 }
             }
 
-            if (is_key_going_down(key_f10)) {
+            //move backward through examples 1-8
+            if (is_key_going_down(key_backspace)) {
                 --current_example;
                 if (current_example > min_example)
                 {
@@ -209,6 +230,9 @@ namespace octet {
                     std::cout << "\ncurrent example: " << current_example << "\n";//check
                 }
 
+                else if (current_example <= min_example) {
+                    reboot();
+                }
             }
 
             //reset to first launch                        
@@ -263,9 +287,7 @@ namespace octet {
 
 
             //increase segment width
-
             if (is_key_down(key_f8)) {
-
                 if (current_iteration > min_iteration) {
                     t.read_file(current_example);
                     add_width += 0.05f;
@@ -277,7 +299,6 @@ namespace octet {
             }
 
             //decrease segment width (fix because when it gets to zero it disappears
-
             if (is_key_down(key_f7)) {
                 //if (current_iteration) 
                 t.read_file(current_example);
@@ -289,10 +310,7 @@ namespace octet {
                     }
                 }
             }
-                
-                    
-          
-
+                                           
             //decrease angle at current iteration
             if (is_key_down(key_f2)) {
 
@@ -381,7 +399,7 @@ namespace octet {
             for (unsigned int i = 0; i < axiom.size(); ++i) {
                 if (axiom[i] == '+') {
 
-                    //std::cout << "\Angle: " << angle << "\n";//check
+                    
                     switch (current_example)
                     {
                     case 1: angle += (25.7f + add_angle);
@@ -398,13 +416,11 @@ namespace octet {
                         break;
                     case 7: angle += (90.0f + add_angle);
                         break;
-                    case 8: angle += (25.7f + add_angle);
+                    case 8: angle += (90.0f + add_angle);
                         break;                                             
                     }
                 }
-                else if (axiom[i] == '-') {
-
-                    //std::cout << "\Angle: " << angle << "\n";//check
+                else if (axiom[i] == '-') {               
 
                     switch (current_example)
                     {
@@ -422,7 +438,7 @@ namespace octet {
                         break;
                     case 7: angle -= (90.0f + add_angle);
                         break;
-                    case 8: angle -= (25.7f + add_angle);
+                    case 8: angle -= (90.0f + add_angle);
                         break;
                     }
                 }
@@ -438,12 +454,7 @@ namespace octet {
                     pos = n.get_pos();
                     trunk_counter--;
                 }
-
-                /*else if (axiom[i] == 'A') {
-                    
-                    n = 1;
-                }*/
-
+        
                 else if (axiom[i] == 'F') {
                     pos = draw_segment(pos, angle);
                 }
