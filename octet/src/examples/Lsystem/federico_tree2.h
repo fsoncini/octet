@@ -1,4 +1,3 @@
-#include <math.h>
 
 namespace octet {
     class tree : public resource {
