@@ -45,6 +45,8 @@ namespace octet {
         dynarray<node> node_stack;
 
         float tree_max_y = 0.0f;
+        float tree_max_x = 0.0f;
+        float tree_min_x = 0.0f;
         dynarray <material*> materials;
 
         material *material_wood;
@@ -358,9 +360,6 @@ namespace octet {
                 }
             }
  
-
-
-
             //switch to choose between normal mode and example mode
             if (is_key_going_down(key_f3)) {
                 example_mode = !example_mode;
@@ -378,10 +377,21 @@ namespace octet {
             app_scene->get_camera_instance(0)->set_far_plane(far_plane);
 
             tree_max_y = 0.0f;
+            tree_max_x = 0.0f;
+            tree_min_x = 0.0f;
             create_geometry();
 
-            app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, tree_max_y / 2.0f, 0.0f));
+            scene_node& camera_node = *app_scene->get_camera_instance(0)->get_node();
 
+            float ref = (tree_max_y > tree_max_x) ? tree_max_y : tree_max_x;
+
+            float dy = (tree_max_y / 2.0f) - camera_node.get_position().y();
+            float dz = ref - camera_node.get_position().z();
+            float dx =  ((tree_max_x + tree_min_x)/ 2.0f) - camera_node.get_position().x();
+            float padding = 7.0f;
+            dz += padding*current_iteration;
+
+            camera_node.translate(vec3(dx, dy, dz));
         }
 
         vec3 draw_segment(vec3 start_pos, float angle) {
@@ -395,6 +405,15 @@ namespace octet {
 
             if (tree_max_y < end_pos.y()) {
                 tree_max_y = end_pos.y();
+            }
+
+            //if less than max, set it to that
+            if (tree_max_x < end_pos.x()) {
+                tree_max_x = end_pos.x();
+            }
+
+            if (tree_min_x > end_pos.x()){
+                tree_min_x = end_pos.x();
             }
 
             mat4t mtw;
