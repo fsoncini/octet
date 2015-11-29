@@ -62,8 +62,8 @@ namespace octet {
         int n = 1; // color index here?
         const int min_example = 1;
         const int MAX_example = 8;
-        int min_iteration = 0;
-        int max_iteration = 5;
+        unsigned int min_iteration = 0;
+        unsigned int max_iteration = 5;
         
 
         float far_plane = 500.0f;
