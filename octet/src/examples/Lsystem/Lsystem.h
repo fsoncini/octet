@@ -230,7 +230,7 @@ namespace octet {
                 }
             }
 
-            //reset to first launch                        
+            //reset to first iteration                        
             if (is_key_down(key_f4)) {
              reset_to_first();
             }
@@ -278,11 +278,11 @@ namespace octet {
             }
 
             //resume here
-            if (is_key_going_down(key_tab))
+            if (is_key_down(key_tab))
             {
                 for (int i = 0; i < app_scene->get_num_mesh_instances(); ++i) {
                     mesh_instance *mi = app_scene->get_mesh_instance(i);
-                    mi->get_node()->rotate(2.0f, vec3(0, 1, 0));
+                    mi->get_node()->rotate(2.0f, vec3(0, -1, 0));
                 }
             }
                 
@@ -304,7 +304,7 @@ namespace octet {
                 if (current_iteration > min_iteration) {
                 t.read_file(current_example);
                 add_width -= 0.05f;
-                for (unsigned i = 1; i <= current_iteration; i++) {
+                for (unsigned int i = 1; i <= current_iteration; i++) {
                         t.apply();
                         draw_again();
                     }
@@ -323,16 +323,11 @@ namespace octet {
                 }
             }
 
+            //switch to choose between normal mode and example mode
             if (is_key_going_down(key_f3)) {
                 example_mode = !example_mode;
                 draw_again();
             }
-
-
-            //if (current_iteration > 4) {
-            //    app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 1.50f)); //fix this here
-            //    
-            //}
             
         }
 
