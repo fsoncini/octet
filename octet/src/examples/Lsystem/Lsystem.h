@@ -426,7 +426,6 @@ namespace octet {
             mtw2.loadIdentity();
             mtw2.rotate(90, 1, 0, 0);
             
-
             mesh_cylinder *box = new mesh_cylinder(zcylinder(vec3(0), SEGMENT_WIDTH + add_width, SEGMENT_LENGTH + add_length), mtw2*mtw);
             
             scene_node *node = new scene_node();
@@ -437,8 +436,7 @@ namespace octet {
             }
             else {
                 app_scene->add_mesh_instance(new mesh_instance(node, box, materials[current_iteration%materials.size()]));
-            }
-                           
+            }                    
             return end_pos;
         }
 
