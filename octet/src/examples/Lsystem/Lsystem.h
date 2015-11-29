@@ -67,7 +67,7 @@ namespace octet {
         float far_plane = 500.0f;
         float add_angle = 0.0f;
         float add_width = 0.0f;
-        float add_length = 2.0f;
+        float add_length = 0.0f;
 
         int trunk_counter = 0;
         bool example_mode = false;
@@ -237,23 +237,33 @@ namespace octet {
             }
 
             //zoom in
-            if (is_key_down(key_up)){
+            if (is_key_down(key_lmb)){
                 app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -1.50f));
             }
             //zoom out
-            if (is_key_down(key_down)) {
+            if (is_key_down(key_rmb)) {
                 app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 2.0f));
             }
 
             //move right
             if (is_key_down(key_right)) {
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(1.0f, 0, 0.0f));
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(-1.0f, 0, 0.0f));
             }
 
             //move left
             if (is_key_down(key_left)) {
-                app_scene->get_camera_instance(0)->get_node()->translate(vec3(-1.0f, 0, 0.0f));
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(1.0f, 0, 0.0f));
             }
+
+            if (is_key_down(key_up)) {
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, -1.0f, 0.0f));
+            }
+
+            if (is_key_down(key_down)) {
+                app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 1.0f, 0.0f));
+            }
+
+
 
 
             //increase angle at current iteration
@@ -323,8 +333,33 @@ namespace octet {
                     }
                 }
             }
-                                           
+            
+            //increase segment length
+            if (is_key_going_down(key_f6)){
+                if (current_iteration) {
+                    t.read_file(current_example);
+                    add_length += 0.05f;
+                    for (unsigned int i = 1; i <= current_iteration; i++) {
+                        t.apply();
+                        draw_again();
+                    }
+                }
+            }
+
+            //decrease segment length
+            if (is_key_going_down(key_f5)){
+                if (current_iteration) {
+                    t.read_file(current_example);
+                    add_length -= 0.05f;
+                    for (unsigned int i = 1; i <= current_iteration; i++) {
+                        t.apply();
+                        draw_again();
+                    }
+                }
+            }
  
+
+
 
             //switch to choose between normal mode and example mode
             if (is_key_going_down(key_f3)) {
