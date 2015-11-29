@@ -70,11 +70,7 @@ namespace octet {
 
         int trunk_counter = 0;
         bool example_mode = false;
-        
-
-        //draw text function. experiment here to fix
-
-       
+              
 
     public:
         lsystems(int argc, char **argv) : app(argc, argv) {
@@ -260,7 +256,7 @@ namespace octet {
 
 
             //increase angle at current iteration
-            if (is_key_down(key_f1)) {
+            if (is_key_going_down(key_f1)) {
 
                 if (current_iteration) {
                     t.read_file(current_example);
@@ -292,7 +288,7 @@ namespace octet {
                 
 
             //increase segment width
-            if (is_key_down(key_f8)) {
+            if (is_key_going_down(key_f8)) {
                 if (current_iteration > min_iteration) {
                     t.read_file(current_example);
                     add_width += 0.05f;
@@ -303,32 +299,20 @@ namespace octet {
                 }
             }
 
-            //decrease segment width (fix because when it gets to zero it disappears
-            if (is_key_down(key_f7)) {
-                //if (current_iteration) 
+            //decrease segment width 
+            if (is_key_going_down(key_f7)) { 
+                if (current_iteration > min_iteration) {
                 t.read_file(current_example);
-                if (SEGMENT_WIDTH > 0.3f) {
-                    add_width -= 0.05f;
-                    for (unsigned i = 1; i <= current_iteration; i++) {
+                add_width -= 0.05f;
+                for (unsigned i = 1; i <= current_iteration; i++) {
                         t.apply();
                         draw_again();
-                    }
-                }
-
-                else if (SEGMENT_WIDTH <= 0.3f) {
-                    add_width = 0.0f;
-
-                    for (unsigned int i = 1; i <= current_iteration; i++) {
-                        t.apply();
-                        draw_again();
-                        
                     }
                 }
             }
                                            
             //decrease angle at current iteration
-            if (is_key_down(key_f2)) {
-
+            if (is_key_going_down(key_f2)) {
                 if (current_iteration) {
                     t.read_file(current_example);
                     add_angle -= 1.5f;
