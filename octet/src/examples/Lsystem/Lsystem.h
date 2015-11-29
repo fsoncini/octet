@@ -199,7 +199,7 @@ namespace octet {
             }
 
             //move forward through examples 1-8
-            if (is_key_going_down(key_f11)) {
+            if (is_key_going_down(key_f11) && current_example < MAX_example) {
                 ++current_example;
                 if (current_example < MAX_example) {
                         current_iteration = min_iteration;
