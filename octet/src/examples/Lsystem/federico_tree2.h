@@ -70,34 +70,7 @@ namespace octet {
            
             while (cursor < clean_data.size()) {
                 char key = clean_data[cursor];
-                //stochastic experiment
-       /*         float random = (float)((rand() % 10)*0.1) * 3;
-                int i = 0;
-                for (i = 1; i < 3; i++)
-                {
-                    if (random < i) break;
-                }
-
-                switch (i)
-                {
-                case 1:
-                    cursor += 3;
-                    break;
-                case 2:
-                    cursor += 18;
-
-                    break;
-                case 3:
-                    cursor += 28;
-
-                    break;
-                }*/
-
                 cursor += 3;
-                
-               
-             
-               
                 for (; cursor < clean_data.size(); ++cursor) {
                     char current_char = clean_data[cursor];
                     if (current_char == ';') {
