@@ -67,6 +67,7 @@ namespace octet {
         float far_plane = 500.0f;
         float add_angle = 0.0f;
         float add_width = 0.0f;
+        float add_length = 2.0f;
 
         int trunk_counter = 0;
         bool example_mode = false;
@@ -145,25 +146,25 @@ namespace octet {
 
                 //
                 if (current_example == 1) {
-                    max_iteration = 5;
+                    max_iteration = 6;
                 }
                 else if (current_example == 2) {
-                    max_iteration = 5;
+                    max_iteration = 6;
                 }
                 else if (current_example == 3) {
-                    max_iteration = 4;
+                    max_iteration = 5;
                 }
                 else if (current_example == 4) {
                     //min_iteration = 0;
-                    max_iteration = 7;
+                    max_iteration = 8;
                 }
                 else if (current_example == 5) {
                     //min_iteration = 0;
-                    max_iteration = 7;
+                    max_iteration = 8;
                 }
                 else if (current_example == 6) {
                     //min_iteration = 0;
-                    max_iteration = 7; //one more because of X 
+                    max_iteration = 6; //one more because of X 
                 }
                 else if (current_example == 7) {
                     max_iteration = 6;
@@ -180,7 +181,7 @@ namespace octet {
                     std::cout << "\ncurrent example: " << current_example << "\n";
                     std::cout << "current iteration: " << current_iteration << "\n";
                 }
-                //fix this
+                
                 else if (current_iteration == max_iteration) {           
                     reset_to_first();
                     std::cout << "\nIteration limit reached. \n";
@@ -256,7 +257,7 @@ namespace octet {
 
 
             //increase angle at current iteration
-            if (is_key_going_down(key_f1)) {
+            if (is_key_down(key_f1)) {
 
                 if (current_iteration) {
                     t.read_file(current_example);
@@ -268,7 +269,19 @@ namespace octet {
                 }
             }
 
-            //Rotation (adjust and change)
+            //decrease angle at current iteration
+            if (is_key_down(key_f2)) {
+                if (current_iteration) {
+                    t.read_file(current_example);
+                    add_angle -= 1.5f;
+                    for (unsigned int i = 1; i <= current_iteration; i++){
+                        t.apply();
+                        draw_again();
+                    }
+                }
+            }
+
+            //rotate right
             if (is_key_down(key_delete))
             {
                 for (int i = 0; i < app_scene->get_num_mesh_instances(); ++i) {
@@ -277,7 +290,7 @@ namespace octet {
                 }
             }
 
-            //resume here
+            //rotate left
             if (is_key_down(key_tab))
             {
                 for (int i = 0; i < app_scene->get_num_mesh_instances(); ++i) {
@@ -288,8 +301,8 @@ namespace octet {
                 
 
             //increase segment width
-            if (is_key_going_down(key_f8)) {
-                if (current_iteration > min_iteration) {
+            if (is_key_down(key_f8)) {
+                if (current_iteration) {
                     t.read_file(current_example);
                     add_width += 0.05f;
                     for (unsigned int i = 1; i <= current_iteration; i++) {
@@ -300,8 +313,8 @@ namespace octet {
             }
 
             //decrease segment width 
-            if (is_key_going_down(key_f7)) { 
-                if (current_iteration > min_iteration) {
+            if (is_key_down(key_f7)) { 
+                if (current_iteration) {
                 t.read_file(current_example);
                 add_width -= 0.05f;
                 for (unsigned int i = 1; i <= current_iteration; i++) {
@@ -311,17 +324,7 @@ namespace octet {
                 }
             }
                                            
-            //decrease angle at current iteration
-            if (is_key_going_down(key_f2)) {
-                if (current_iteration) {
-                    t.read_file(current_example);
-                    add_angle -= 1.5f;
-                    for (unsigned int i = 1; i <= current_iteration; i++){
-                        t.apply();
-                        draw_again();
-                    }
-                }
-            }
+ 
 
             //switch to choose between normal mode and example mode
             if (is_key_going_down(key_f3)) {
@@ -370,7 +373,7 @@ namespace octet {
             mtw2.rotate(90, 1, 0, 0);
             
 
-            mesh_cylinder *box = new mesh_cylinder(zcylinder(vec3(0), SEGMENT_WIDTH + add_width, SEGMENT_LENGTH), mtw2*mtw);
+            mesh_cylinder *box = new mesh_cylinder(zcylinder(vec3(0), SEGMENT_WIDTH + add_width, SEGMENT_LENGTH + add_length), mtw2*mtw);
             
             scene_node *node = new scene_node();
             app_scene->add_child(node);
