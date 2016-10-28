@@ -5,7 +5,7 @@
 // Modular Framework for OpenGLES2 rendering on multiple platforms.
 //
 
-#include "plank.h"
+//#include "plank.h"
 
 
 namespace octet {
@@ -19,9 +19,6 @@ namespace octet {
   public:
     example_shapes(int argc, char **argv) : app(argc, argv) {
     }
-
-	btRigidBody *first_sphere = NULL;
-	btRigidBody *first_box = NULL;
 
     ~example_shapes() {
     }
@@ -39,15 +36,15 @@ namespace octet {
       mat4t mat;
       mat.translate(-3, 6, 0);
 	 
-	  btRigidBody *first_box = NULL;
-	  btRigidBody *first_cylinder = NULL;
+	  //btRigidBody *first_box = NULL;
+	  //btRigidBody *first_cylinder = NULL;
 	  
 	  //it can be used to directly access RigidBody component
-	  app_scene->add_shapeRB(mat, new mesh_sphere(vec3(2, 2, 2), 2), red, &first_sphere, true);
+	  //app_scene->add_shapeRB(mat, new mesh_sphere(vec3(2, 2, 2), 2), red, &first_sphere, true);
 
-      mat.loadIdentity();
-      mat.translate(0, 10, 0);
-      app_scene->add_shapeRB(mat, new mesh_box(vec3(2, 2, 2)), red, &first_box, true);
+      //mat.loadIdentity();
+      //mat.translate(0, 10, 0);
+      //app_scene->add_shapeRB(mat, new mesh_box(vec3(2, 2, 2)), red, &first_box, true);
 
      /* mat.loadIdentity();
       mat.translate( 3, 6, 0);
@@ -78,38 +75,43 @@ namespace octet {
 
 	//this is just a test
 	void create_bridge() {
+		
+		
+		btRigidBody *first_sphere = NULL;
+		btRigidBody *boxRB = NULL;
+		
 		mat4t mtw;
 		mtw.loadIdentity();
 		mtw.translate(vec3(0, 0.5f, 0));
-		mesh_instance *b1 = app_scene->add_shapeRB(mtw, new mesh_sphere(vec3(2, 2, 2), 2), new material(vec4(0, 0, 1, 1)), &first_sphere, false);
-
+		mesh_instance *b1 = app_scene->add_shapeRB(mtw, new mesh_box(vec3(1, 1, 1), 1), new material(vec4(0, 0, 1, 1)), &boxRB, false);
+		
 		mtw.loadIdentity();
 		mtw.translate(vec3(1.6f, 1.25f, 0.0f));
-		mesh_instance *p1 = app_scene->add_shapeRB(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), &first_box, true);
+		mesh_instance *p1 = app_scene->add_shapeRB(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), &boxRB, true);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(2.7f, 1.25f, 0.0f));
-		mesh_instance *p2 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
+		mesh_instance *p2 = app_scene->add_shapeRB(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)),&boxRB, true);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(3.8f, 1.25f, 0.0f));
-		mesh_instance *p3 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
+		mesh_instance *p3 = app_scene->add_shapeRB(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)),&boxRB, true);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(4.9f, 1.25f, 0.0f));
-		mesh_instance *p4 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
+		mesh_instance *p4 = app_scene->add_shapeRB(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), &boxRB, true);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(6.5f, 0.5f, 0.0f));
-		mesh_instance *b2 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
+		mesh_instance *b2 = app_scene->add_shapeRB(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), &boxRB, false);
 
 		// hinges
 
-		//btHingeConstraint *c1 = new btHingeConstraint(*first_sphere, *first_cylinder);
-		//	btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
-		//	btVector3(0, 0, 1), btVector3(0, 0, 1), false);
-		//c1->setLimit(-PI * 0.1f, PI* 0.1f);
-		//dynamics_world->addConstraint(c1);
+		btHingeConstraint *c1 = new btHingeConstraint(, &p1);
+			btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
+		c1->setLimit(-PI * 0.1f, PI* 0.1f);
+		dynamics_world->addConstraint(c1);
 
 
 
