@@ -75,7 +75,7 @@ namespace octet {
       // ground
       mat.loadIdentity();
       mat.translate(0, -1, 0);
-      app_scene->add_shape(mat, new mesh_box(vec3(200, 1, 200)), green, false);
+      app_scene->add_shape(mat, new mesh_box(vec3(200, 1, 200)), red, false);
 
 	  set_up_map();
     }
@@ -83,9 +83,9 @@ namespace octet {
 	void set_up_map() {
 		btRigidBody *boxRB = NULL;
 		mat4t mtw;
-		mtw.loadIdentity();
-		mesh_instance *slab = app_scene->add_shapeRB(mtw, new mesh_box(vec3(1, 1, 1), 1), new material(vec4(1, 0, 1, 1)), &boxRB, false);
-	
+		//mtw.loadIdentity();
+		
+		
 		
 
 		for (int i = 0; i < map_height; i++) {
@@ -94,8 +94,9 @@ namespace octet {
 				
 				if (map[i][j] == 1) {
 
-					m = *slab;
-					
+					mesh_instance *slab = app_scene->add_shapeRB(mtw, new mesh_box(vec3(1, 1, 1), 1), new material(vec4(1, 0, 1, 1)), &boxRB, false);
+					mtw.init(1.0f, 1.0f, 1.0f, 1.0f);
+					mtw.loadIdentity();
 				}
 				
 			}
