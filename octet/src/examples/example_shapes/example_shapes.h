@@ -7,6 +7,10 @@
 
 //#include "plank.h"
 
+#include <iostream>
+#include <fstream>
+#include <vector>
+
 
 namespace octet {
   /// Scene containing a box with octet.
@@ -15,6 +19,18 @@ namespace octet {
     ref<visual_scene> app_scene;
 	const float PI = 3.14159;
 	btDiscreteDynamicsWorld *dynamics_world;
+
+	
+
+	//Declare arrays and global variables, used in reading and implementing Csv file
+	static const int map_width = 61;
+	static const int map_height = 20;
+	int map[map_height][map_width];
+	
+
+	dynarray<mesh_instance> slabs;
+	dynarray<mesh_instance> ropes;
+
 
   public:
     example_shapes(int argc, char **argv) : app(argc, argv) {
@@ -35,6 +51,8 @@ namespace octet {
 
       mat4t mat;
       mat.translate(-3, 6, 0);
+
+	  Read_Csv();
 	 
 	  //btRigidBody *first_box = NULL;
 	  //btRigidBody *first_cylinder = NULL;
@@ -51,14 +69,41 @@ namespace octet {
       app_scene->add_shapeRB(mat, new mesh_cylinder(zcylinder(vec3(0, 0, 0), 2, 4)), blue, &first_cylinder, true);*/
 
 	  //test bridge
-	  create_bridge();
+	  //create_bridge();
 
 
       // ground
       mat.loadIdentity();
       mat.translate(0, -1, 0);
       app_scene->add_shape(mat, new mesh_box(vec3(200, 1, 200)), green, false);
+
+	  set_up_map();
     }
+
+	void set_up_map() {
+		btRigidBody *boxRB = NULL;
+		mat4t mtw;
+		mtw.loadIdentity();
+		mesh_instance *slab = app_scene->add_shapeRB(mtw, new mesh_box(vec3(1, 1, 1), 1), new material(vec4(1, 0, 1, 1)), &boxRB, false);
+	
+		
+
+		for (int i = 0; i < map_height; i++) {
+			for (int j = 0; j < map_width; j++) {
+				mesh_instance m;
+				
+				if (map[i][j] == 1) {
+
+					m = *slab;
+					
+				}
+				
+			}
+		}
+
+	
+	}
+
 
     /// this is called to draw the world
     void draw_world(int x, int y, int w, int h) {
@@ -107,16 +152,49 @@ namespace octet {
 
 		// hinges
 
-		btHingeConstraint *c1 = new btHingeConstraint(, &p1);
-			btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
-			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
-		c1->setLimit(-PI * 0.1f, PI* 0.1f);
-		dynamics_world->addConstraint(c1);
+		//btHingeConstraint *c1 = new btHingeConstraint(, &p1);
+		//	btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+		//	btVector3(0, 0, 1), btVector3(0, 0, 1), false);
+		//c1->setLimit(-PI * 0.1f, PI* 0.1f);
+		//dynamics_world->addConstraint(c1);
 
 
 
 
 
 	}
+
+
+	void Read_Csv() {
+
+
+		std::ifstream file("background_new.csv");
+
+	
+
+		// store the line here
+		char buffer[2048];
+		int i = 0;
+
+		// loop over lines
+		while (!file .eof()) {
+			file.getline(buffer, sizeof(buffer));
+
+			// loop over columns
+			char *b = buffer;
+			for (int j = 0; ; ++j) {
+				char *e = b;
+				while (*e != 0 && *e != ',') ++e;
+
+				map[i][j] = std::atoi(b);
+
+				if (*e != ',') break;
+				b = e + 1;
+			}
+			++i;
+		}
+	}
+
+
   };
 }
