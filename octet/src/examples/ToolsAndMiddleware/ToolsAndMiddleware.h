@@ -96,6 +96,9 @@ namespace octet {
     void app_init() {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
+	  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.0f, 1.0f));
+	  
+	  
 	  dynamics_world = app_scene->get_bt_world(); //method added in visual_scene.h
 
 	  mouse_look_helper.init(this, 200.0f / 360, false);
@@ -303,6 +306,18 @@ namespace octet {
 	  if (is_key_going_down(key_lmb)) {
 		  shoot();
 	  }
+
+
+	  //zoom in
+	  if (is_key_down(key_mmb)) {
+		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -1.50f));
+	  }
+
+	  //zoom out
+	  if (is_key_down(key_rmb)) {
+		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 2.0f));
+	  }
+
 
 	  bullet_cleanup();
 
