@@ -29,7 +29,7 @@ namespace octet {
 	
 
 	dynarray<mesh_instance> slabs;
-	dynarray<mesh_instance> ropes;
+	
 
 
   public:
@@ -69,7 +69,7 @@ namespace octet {
       app_scene->add_shapeRB(mat, new mesh_cylinder(zcylinder(vec3(0, 0, 0), 2, 4)), blue, &first_cylinder, true);*/
 
 	  //test bridge
-	  //create_bridge();
+	  create_bridge();
 
 
       // ground
@@ -77,6 +77,7 @@ namespace octet {
       mat.translate(0, -1, 0);
       app_scene->add_shape(mat, new mesh_box(vec3(200, 1, 200)), red, false);
 
+	  //inizializes map after reading csv
 	  set_up_map();
     }
 
@@ -95,6 +96,8 @@ namespace octet {
 				if (map[i][j] == 1) {
 
 					mesh_instance *slab = app_scene->add_shapeRB(mtw, new mesh_box(vec3(1, 1, 1), 1), new material(vec4(1, 0, 1, 1)), &boxRB, false);
+					slabs.push_back(*slab);
+					
 					mtw.init(1.0f, 1.0f, 1.0f, 1.0f);
 					mtw.loadIdentity();
 				}
@@ -108,18 +111,44 @@ namespace octet {
 
     /// this is called to draw the world
     void draw_world(int x, int y, int w, int h) {
-      int vx = 0, vy = 0;
+      
+	
+	  int vx = 0, vy = 0;
       get_viewport_size(vx, vy);
       app_scene->begin_render(vx, vy);
-
-      // update matrices. assume 30 fps.
+	 
+      
+	  
+	  //draw the map meshes //FIX IT
+	  //for (unsigned int i = 0; i < slabs.size(); ++i) {
+		 // 
+		 // mat4t mtw;
+		 // mtw.loadIdentity();
+		 // mtw.translate(vec3(slabs[i].get_node() -> get_x(), (slabs[i].get_node() -> get_y(), 0.0f));
+	  //}
+	  //
+	  
+	  
+	  
+	  
+	  // update matrices. assume 30 fps.
       app_scene->update(1.0f/30);
+
+
+
+
+
 
       // draw the scene
       app_scene->render((float)vx / vy);
+
+
+
+
+
     }
 
-	//this is just a test
+	//this is a test
 	void create_bridge() {
 		
 		
@@ -151,17 +180,38 @@ namespace octet {
 		mtw.translate(vec3(6.5f, 0.5f, 0.0f));
 		mesh_instance *b2 = app_scene->add_shapeRB(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), &boxRB, false);
 
-		// hinges
+	
+		// hinges //FIX THIS
 
-		//btHingeConstraint *c1 = new btHingeConstraint(, &p1);
-		//	btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
-		//	btVector3(0, 0, 1), btVector3(0, 0, 1), false);
-		//c1->setLimit(-PI * 0.1f, PI* 0.1f);
-		//dynamics_world->addConstraint(c1);
+		btHingeConstraint *c1 = new btHingeConstraint(*(b1->get_node()->get_rigid_body()), *(p1->get_node()->get_rigid_body()),
+			btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
+		c1->setLimit(-PI * 0.1f, PI* 0.1f);
+		dynamics_world->addConstraint(c1);
 
+		btHingeConstraint *c2 = new btHingeConstraint(*(p1->get_node()->get_rigid_body()), *(p2->get_node()->get_rigid_body()),
+			btVector3(0.5f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
+		c2->setLimit(-PI * 0.1f, PI* 0.1f);
+		dynamics_world->addConstraint(c2);
 
+		btHingeConstraint *c3 = new btHingeConstraint(*(p2->get_node()->get_rigid_body()), *(p3->get_node()->get_rigid_body()),
+			btVector3(0.5f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
+		c3->setLimit(-PI * 0.1f, PI* 0.1f);
+		dynamics_world->addConstraint(c3);
 
+		btHingeConstraint *c4 = new btHingeConstraint(*(p3->get_node()->get_rigid_body()), *(p4->get_node()->get_rigid_body()),
+			btVector3(0.5f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
+		c4->setLimit(-PI * 0.1f, PI* 0.1f);
+		dynamics_world->addConstraint(c4);
 
+		btHingeConstraint *c5 = new btHingeConstraint(*(p4->get_node()->get_rigid_body()), *(b2->get_node()->get_rigid_body()),
+			btVector3(0.5f, 0.25f, 0.0f), btVector3(-0.5f, 0.5f, 0.0f),
+			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
+		c5->setLimit(-PI * 0.1f, PI* 0.1f);
+		dynamics_world->addConstraint(c5);
 
 	}
 
