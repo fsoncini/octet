@@ -11,31 +11,31 @@
 namespace octet {
 
 
-	class bullet {
-		mesh_instance *mi;
-		int timer;
-	public:
-		bullet() {
-			timer = 0;
-		}
+	//class bullet {
+	//	mesh_instance *mi;
+	//	int timer;
+	//public:
+	//	bullet() {
+	//		timer = 0;
+	//	}
 
-		bullet(mesh_instance *mi_) {
-			mi = mi_;
-			timer = 0;
-		}
+	//	bullet(mesh_instance *mi_) {
+	//		mi = mi_;
+	//		timer = 0;
+	//	}
 
-		mesh_instance& get_mesh_instance() {
-			return *mi;
-		}
+	//	mesh_instance& get_mesh_instance() {
+	//		return *mi;
+	//	}
 
-		mesh_instance* getp_mesh_instance() {
-			return mi;
-		}
+	//	mesh_instance* getp_mesh_instance() {
+	//		return mi;
+	//	}
 
-		int& get_timer() {
-			return timer;
-		}
-	};
+	//	int& get_timer() {
+	//		return timer;
+	//	}
+	//};
 
   class ToolsAndMiddleware : public app {
   private:
@@ -48,13 +48,14 @@ namespace octet {
 
 	//camera & fps members
 	mouse_look moving_mouse_view;
+	object_picker mouse_grab; //Test
 	ref<camera_instance> main_camera;
 
-	helper_fps_controller fps_helper;
+	/*helper_fps_controller fps_helper;*/
 	ref<scene_node> player_node;
 
 	// storing all bullets so we can do clean-up
-	dynarray<bullet> bullets;
+	/*dynarray<bullet> bullets;*/
 
 	// jukebox (plays sound when you hit it)
 	int jukebox_index;
@@ -93,42 +94,39 @@ namespace octet {
 	  dynamics_world = app_scene->get_bt_world(); //method added in visual_scene.h
 
 	  moving_mouse_view.init(this, 200.0f / 360, false);
-	  fps_helper.init(this);
+	  mouse_grab.init(this);
+	  //fps_helper.init(this);
 
 	  main_camera = app_scene->get_camera_instance(0);
 	  main_camera->get_node()->translate(vec3(0, 4, 0));
 	  main_camera->set_far_plane(10000);
 
+	  //terrain background
 	  mat4t mat;
 	  mat.loadIdentity();
-
-	  mesh_instance *mi = app_scene->add_shape(
-		  mat,
-		  new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source),
-		  new material(vec4(0, 1, 0, 1)), //green background, not using sprite
-		  false, 0
-	  );
+	  mesh_instance *mi = app_scene->add_shape( mat, new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source),
+		  new material(vec4(0, 1, 0, 1)), false, 0);
 	  btRigidBody *rb = mi->get_node()->get_rigid_body();
 	  
-	  float player_height = 1.8f;
-	  float player_radius = 0.25f;
-	  float player_mass = 90.0f;
+	  //float player_height = 1.8f;
+	  //float player_radius = 0.25f;
+	  //float player_mass = 90.0f;
 
-	  mat.loadIdentity();
-	  mat.translate(0.0f, player_height*6.0f, 50.0f);
+	  //mat.loadIdentity();
+	  //mat.translate(0.0f, player_height*6.0f, 50.0f);
 
 	  //sphere being shot FIX
-	  mesh_instance *mi2 = app_scene->add_shape(
-		  mat,
-		  new mesh_sphere(vec3(0), player_radius),
-		  new material(vec4(1, 0, 0, 1)),
-		  true, player_mass,
-		  new btCapsuleShape(0.25f, player_height)
-	  ); 
+	  //mesh_instance *mi2 = app_scene->add_shape(
+		 // mat,
+		 // new mesh_sphere(vec3(0), player_radius),
+		 // new material(vec4(1, 0, 0, 1)),
+		 // true, player_mass,
+		 // new btCapsuleShape(0.25f, player_height)
+	  //); 
 
 
-	  player_node = mi2->get_node();
-	  player_index = player_node->get_rigid_body()->getUserIndex();
+	  //player_node = mi2->get_node();
+	  //player_index = player_node->get_rigid_body()->getUserIndex();
 
 	  //big purple box
 	  mat.loadIdentity();
@@ -246,7 +244,7 @@ namespace octet {
 	}
 
 
-	void shoot() {
+	/*void shoot() {
 		mat4t mtw;
 		mtw.translate(main_camera->get_node()->get_position());
 		bullet b = bullet(app_scene->add_shape(mtw, new mesh_sphere(vec3(1), 0.2f), new material(vec4(1, 0, 0.8f, 1)), true, 0.01f));
@@ -263,7 +261,7 @@ namespace octet {
 				bullets.resize(bullets.size() - 1);
 			}
 		}
-	}
+	}*/
 
 	ALuint get_sound_source() {
 		sound_source = sound_source % num_sound_sources;
@@ -331,8 +329,17 @@ namespace octet {
 		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, -0.5f, 0.0f));
 	  }
 
+	  //TEST
+	  if (is_key_down(key_mmb)) {
+		  ALuint source = get_sound_source();
+		  alSourcei(source, AL_BUFFER, sound);
+		  alSourcePlay(source);
 
-	  bullet_cleanup();
+	  }
+	 
+
+
+	  //bullet_cleanup();
 
 	  check_collisions();
 
