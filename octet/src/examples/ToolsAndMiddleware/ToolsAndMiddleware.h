@@ -105,7 +105,7 @@ namespace octet {
 	  mesh_instance *mi = app_scene->add_shape(
 		  mat,
 		  new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source),
-		  new material(vec4(1, 0, 0, 1)), //green background, not using sprite
+		  new material(vec4(0, 1, 0, 1)), //green background, not using sprite
 		  false, 0
 	  );
 	  btRigidBody *rb = mi->get_node()->get_rigid_body();
@@ -151,27 +151,27 @@ namespace octet {
 		//slabs adding 1 to x axis (all but first and last)
 		mat4t mtw; //could call it mat too?
 		mtw.loadIdentity();
-		mtw.translate(vec3(-15.3, 4.5f, 0));
+		mtw.translate(vec3(0, 0.5f, 0));
 		mesh_instance *b1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
 
 		mtw.loadIdentity();
-		mtw.translate(vec3(-1.7f, 1.25f, 0.0f));
-		mesh_instance *p1 = app_scene->add_shape(mtw, new mesh_box(vec3(2.0f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
-
-		mtw.loadIdentity();
-		mtw.translate(vec3(0.4f, 1.25f, 0.0f));
-		mesh_instance *p2 = app_scene->add_shape(mtw, new mesh_box(vec3(2.0f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
+		mtw.translate(vec3(1.6f, 1.25f, 0.0f));
+		mesh_instance *p1 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(2.7f, 1.25f, 0.0f));
-		mesh_instance *p3 = app_scene->add_shape(mtw, new mesh_box(vec3(2.0f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
+		mesh_instance *p2 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
 
 		mtw.loadIdentity();
-		mtw.translate(vec3(5.0f, 1.25f, 0.0f));
-		mesh_instance *p4 = app_scene->add_shape(mtw, new mesh_box(vec3(2.0f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
+		mtw.translate(vec3(3.8f, 1.25f, 0.0f));
+		mesh_instance *p3 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
 
 		mtw.loadIdentity();
-		mtw.translate(vec3(15.3f, 4.5f, 0.0f));
+		mtw.translate(vec3(4.9f, 1.25f, 0.0f));
+		mesh_instance *p4 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
+
+		mtw.loadIdentity();
+		mtw.translate(vec3(6.5f, 0.5f, 0.0f));
 		mesh_instance *b2 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
 
 		//hinges
@@ -183,25 +183,25 @@ namespace octet {
 		dynamics_world->addConstraint(c1);
 
 		btHingeConstraint *c2 = new btHingeConstraint(*(p1->get_node()->get_rigid_body()), *(p2->get_node()->get_rigid_body()),
-			btVector3(0.5f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+			btVector3(1.0f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		c2->setLimit(-PI * 0.1f, PI* 0.1f);
 		dynamics_world->addConstraint(c2);
 
 		btHingeConstraint *c3 = new btHingeConstraint(*(p2->get_node()->get_rigid_body()), *(p3->get_node()->get_rigid_body()),
-			btVector3(0.5f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+			btVector3(1.0f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		c3->setLimit(-PI * 0.1f, PI* 0.1f);
 		dynamics_world->addConstraint(c3);
 
 		btHingeConstraint *c4 = new btHingeConstraint(*(p3->get_node()->get_rigid_body()), *(p4->get_node()->get_rigid_body()),
-			btVector3(0.5f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
+			btVector3(1.0f, 0.25f, 0.0f), btVector3(-0.5f, 0.25f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		c4->setLimit(-PI * 0.1f, PI* 0.1f);
 		dynamics_world->addConstraint(c4);
 
 		btHingeConstraint *c5 = new btHingeConstraint(*(p4->get_node()->get_rigid_body()), *(b2->get_node()->get_rigid_body()),
-			btVector3(0.5f, 0.25f, 0.0f), btVector3(-0.5f, 0.5f, 0.0f),
+			btVector3(1.0f, 0.25f, 0.0f), btVector3(-0.5f, 0.5f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		c5->setLimit(-PI * 0.1f, PI* 0.1f);
 		dynamics_world->addConstraint(c5);
@@ -298,19 +298,37 @@ namespace octet {
       get_viewport_size(vx, vy);
       app_scene->begin_render(vx, vy);
 
-	  if (is_key_going_down(key_lmb)) {
-		  shoot();
-	  }
+	  //if (is_key_going_down(key_lmb)) {
+		 // shoot();
+	  //}
 	  
 
 	  //zoom in
-	  if (is_key_down(key_mmb)) {
-		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -1.50f));
+	  if (is_key_down(key_up)) {
+		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -0.5f));
 	  }
 
 	  //zoom out
+	  if (is_key_down(key_down)) {
+		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 1.0f));
+	  }
+
+	  //move right
+	  if (is_key_down(key_right)) {
+		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.5f, 0, 0.0f));
+	  }
+
+	  //move left
+	  if (is_key_down(key_left)) {
+		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(-0.5f, 0, 0.0f));
+	  }
+	  //move up
+	  if (is_key_down(key_lmb)) {
+		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.5f, 0.0f));
+	  }
+	  //move down
 	  if (is_key_down(key_rmb)) {
-		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 2.0f));
+		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, -0.5f, 0.0f));
 	  }
 
 
@@ -328,7 +346,7 @@ namespace octet {
 	  mat4t &camera_to_world = camera_node->access_nodeToParent();
 	  moving_mouse_view.update(camera_to_world);
 
-	  fps_helper.update(player_node, camera_node);
+	  //fps_helper.update(player_node, camera_node);
 
       // update matrices. assume 30 fps.
       app_scene->update(1.0f/30);
