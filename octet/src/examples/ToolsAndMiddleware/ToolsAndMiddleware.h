@@ -6,7 +6,7 @@
 //
 
 
-#include "slab.h";
+//#include "slab.h";
 
 namespace octet {
 
@@ -37,25 +37,17 @@ namespace octet {
 		}
 	};
 
-
-
-
-
-
-
-
   class ToolsAndMiddleware : public app {
   private:
 	  //constraints
 	  const float PI = 3.14159;
-
 	  btDiscreteDynamicsWorld *dynamics_world;
 
     // scene for drawing box
     ref<visual_scene> app_scene;
 
 	//camera & fps members
-	mouse_look mouse_look_helper;
+	mouse_look moving_mouse_view;
 	ref<camera_instance> main_camera;
 
 	helper_fps_controller fps_helper;
@@ -98,10 +90,9 @@ namespace octet {
       app_scene->create_default_camera_and_lights();
 	  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.0f, 1.0f));
 	  
-	  
 	  dynamics_world = app_scene->get_bt_world(); //method added in visual_scene.h
 
-	  mouse_look_helper.init(this, 200.0f / 360, false);
+	  moving_mouse_view.init(this, 200.0f / 360, false);
 	  fps_helper.init(this);
 
 	  main_camera = app_scene->get_camera_instance(0);
@@ -114,7 +105,7 @@ namespace octet {
 	  mesh_instance *mi = app_scene->add_shape(
 		  mat,
 		  new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source),
-		  new material(vec4(1, 1, 0, 1)), //green background, not using sprite
+		  new material(vec4(1, 0, 0, 1)), //green background, not using sprite
 		  false, 0
 	  );
 	  btRigidBody *rb = mi->get_node()->get_rigid_body();
@@ -126,16 +117,20 @@ namespace octet {
 	  mat.loadIdentity();
 	  mat.translate(0.0f, player_height*6.0f, 50.0f);
 
+	  //sphere being shot FIX
 	  mesh_instance *mi2 = app_scene->add_shape(
 		  mat,
 		  new mesh_sphere(vec3(0), player_radius),
 		  new material(vec4(1, 0, 0, 1)),
 		  true, player_mass,
 		  new btCapsuleShape(0.25f, player_height)
-	  );
+	  ); 
+
+
 	  player_node = mi2->get_node();
 	  player_index = player_node->get_rigid_body()->getUserIndex();
 
+	  //big purple box
 	  mat.loadIdentity();
 	  mat.translate(vec3(30, 1, 0));
 	  mesh_instance *mi3 = app_scene->add_shape(mat, new mesh_box(vec3(2)), new material(vec4(0.2, 0.1, 0.5, 1)), false);
@@ -153,30 +148,30 @@ namespace octet {
 
 	void create_bridge() {
 	
-		//slabs
-		mat4t mtw;
+		//slabs adding 1 to x axis (all but first and last)
+		mat4t mtw; //could call it mat too?
 		mtw.loadIdentity();
-		mtw.translate(vec3(0, 0.5f, 0));
+		mtw.translate(vec3(-15.3, 4.5f, 0));
 		mesh_instance *b1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
 
 		mtw.loadIdentity();
-		mtw.translate(vec3(1.6f, 1.25f, 0.0f));
-		mesh_instance *p1 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
+		mtw.translate(vec3(-1.7f, 1.25f, 0.0f));
+		mesh_instance *p1 = app_scene->add_shape(mtw, new mesh_box(vec3(2.0f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
+
+		mtw.loadIdentity();
+		mtw.translate(vec3(0.4f, 1.25f, 0.0f));
+		mesh_instance *p2 = app_scene->add_shape(mtw, new mesh_box(vec3(2.0f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(2.7f, 1.25f, 0.0f));
-		mesh_instance *p2 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
+		mesh_instance *p3 = app_scene->add_shape(mtw, new mesh_box(vec3(2.0f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
 
 		mtw.loadIdentity();
-		mtw.translate(vec3(3.8f, 1.25f, 0.0f));
-		mesh_instance *p3 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true);
+		mtw.translate(vec3(5.0f, 1.25f, 0.0f));
+		mesh_instance *p4 = app_scene->add_shape(mtw, new mesh_box(vec3(2.0f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
 
 		mtw.loadIdentity();
-		mtw.translate(vec3(4.9f, 1.25f, 0.0f));
-		mesh_instance *p4 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true);
-
-		mtw.loadIdentity();
-		mtw.translate(vec3(6.5f, 0.5f, 0.0f));
+		mtw.translate(vec3(15.3f, 4.5f, 0.0f));
 		mesh_instance *b2 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
 
 		//hinges
@@ -306,7 +301,7 @@ namespace octet {
 	  if (is_key_going_down(key_lmb)) {
 		  shoot();
 	  }
-
+	  
 
 	  //zoom in
 	  if (is_key_down(key_mmb)) {
@@ -331,7 +326,7 @@ namespace octet {
 	  //update camera
 	  scene_node *camera_node = main_camera->get_node();
 	  mat4t &camera_to_world = camera_node->access_nodeToParent();
-	  mouse_look_helper.update(camera_to_world);
+	  moving_mouse_view.update(camera_to_world);
 
 	  fps_helper.update(player_node, camera_node);
 
