@@ -11,61 +11,68 @@
 namespace octet {
 
 
-	//class bullet {
-	//	mesh_instance *mi;
-	//	int timer;
-	//public:
-	//	bullet() {
-	//		timer = 0;
-	//	}
+	class bullet {
+		mesh_instance *mi;
+		int timer;
+	public:
+		bullet() {
+			timer = 0;
+		}
 
-	//	bullet(mesh_instance *mi_) {
-	//		mi = mi_;
-	//		timer = 0;
-	//	}
+		bullet(mesh_instance *mi_) {
+			mi = mi_;
+			timer = 0;
+		}
 
-	//	mesh_instance& get_mesh_instance() {
-	//		return *mi;
-	//	}
+		mesh_instance& get_mesh_instance() {
+			return *mi;
+		}
 
-	//	mesh_instance* getp_mesh_instance() {
-	//		return mi;
-	//	}
+		mesh_instance* getp_mesh_instance() {
+			return mi;
+		}
 
-	//	int& get_timer() {
-	//		return timer;
-	//	}
-	//};
+		int& get_timer() {
+			return timer;
+		}
+	};
 
   class ToolsAndMiddleware : public app {
   private:
-	  //constraints
-	  const float PI = 3.14159;
-	  btDiscreteDynamicsWorld *dynamics_world;
+	//constraints
+	const float PI = 3.14159;
+	btDiscreteDynamicsWorld *physicalWorld;
 
     // scene for drawing box
     ref<visual_scene> app_scene;
 
 	//camera & fps members
 	mouse_look moving_mouse_view;
-	object_picker mouse_grab; //Test
 	ref<camera_instance> main_camera;
 
 	/*helper_fps_controller fps_helper;*/
+	helper_fps_controller fps_helper;
 	ref<scene_node> player_node;
 
-	// storing all bullets so we can do clean-up
-	/*dynarray<bullet> bullets;*/
+	/* storing all bullets so we can do clean-up*/
+	dynarray<bullet> bullets;
 
 	// jukebox (plays sound when you hit it)
 	int jukebox_index;
-	int player_index;
+	int player_index;	
 
-	ALuint sound;
-	unsigned int sound_source;
-	unsigned int num_sound_sources = 32;
-	ALuint sources[32];
-	bool can_play_sound;
+	//materials
+	material *red;
+	material *green;
+	material *blue;
+	material *pink;
+	material *black;
+
+	//ALuint sound;
+	//unsigned int sound_source;
+	//unsigned int num_sound_sources = 32;
+	//ALuint sources[32];
+	//bool can_play_sound;
 
 	int frame_count = 0;
 
@@ -85,71 +92,87 @@ namespace octet {
     ToolsAndMiddleware(int argc, char **argv) : app(argc, argv) {
     }
 
+	
+	//material *pink = new material(vec4(255, 1, 255, 1));
+
     /// this is called once OpenGL is initialized
     void app_init() {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
 	  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.0f, 1.0f));
 	  
-	  dynamics_world = app_scene->get_bt_world(); //method added in visual_scene.h
+	  physicalWorld = app_scene->get_bt_world(); //method added in visual_scene.h
 
 	  moving_mouse_view.init(this, 200.0f / 360, false);
-	  mouse_grab.init(this);
-	  //fps_helper.init(this);
+	  fps_helper.init(this);
 
 	  main_camera = app_scene->get_camera_instance(0);
 	  main_camera->get_node()->translate(vec3(0, 4, 0));
 	  main_camera->set_far_plane(10000);
 
+	  //initialize materials
+	  red = new material(vec4(1, 0, 0, 1));
+	  green = new material(vec4(0, 1, 0, 1));
+	  blue = new material(vec4(0, 0, 1, 1));
+	  pink = new material(vec4(255, 1, 255, 1));
+	  black = new material(vec4(0, 0, 0, 1));
+
 	  //terrain background
 	  mat4t mat;
 	  mat.loadIdentity();
 	  mesh_instance *mi = app_scene->add_shape( mat, new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source),
-		  new material(vec4(0, 1, 0, 1)), false, 0);
+		  pink, false, 0);
 	  btRigidBody *rb = mi->get_node()->get_rigid_body();
 
-	  //TEST PLANK
+	  //TEST DOOR
 	  mat.loadIdentity();
-	  mat.translate(vec3(3.0f, 10.0f, 0.0f));
-	  mesh_instance *k1 = app_scene->add_shape(mat, new mesh_box(vec3(1,1,1)), new material(vec4(0, 1, 1, 1)), true);
+	  mat.translate(vec3(-9.0f, 1.0f, 0.0f));
+	  mesh_instance *k1 = app_scene->add_shape(mat, new mesh_box(vec3(0.2f, 4.0f, 0.2f)), blue, false);
 
 	  mat.loadIdentity();
-	  mat.translate(vec3(6.6f, 10.0f, 0.0f));
-	  mesh_instance *p1 = app_scene->add_shape(mat, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), false);
+	  mat.translate(vec3(-7.8f, 1.0f, 0.0f));
+	  mesh_instance *door = app_scene->add_shape(mat, new mesh_box(vec3(1.0f, 4.0f, 0.2f)), black, true);
+
+	  btHingeConstraint *d = new btHingeConstraint(*(k1->get_node()->get_rigid_body()), *(door->get_node()->get_rigid_body()),
+		  btVector3(0.1f, 2.0f, 0.2f), btVector3(-0.5f, 2.0f, 0.2f),
+		  btVector3(0, 2, 0), btVector3(0, 2, 0), false);
+	  //c1->setLimit(-PI * 0.1f, PI* 0.1f);
+	  physicalWorld->addConstraint(d);
 	  
-	  //float player_height = 1.8f;
-	  //float player_radius = 0.25f;
-	  //float player_mass = 90.0f;
+	  float player_height = 1.8f;
+	  float player_radius = 0.25f;
+	  float player_mass = 90.0f;
 
-	  //mat.loadIdentity();
-	  //mat.translate(0.0f, player_height*6.0f, 50.0f);
+	  mat.loadIdentity();
+	  mat.translate(0.0f, player_height*6.0f, 50.0f);
 
 	  //sphere being shot FIX
-	  //mesh_instance *mi2 = app_scene->add_shape(
-		 // mat,
-		 // new mesh_sphere(vec3(0), player_radius),
-		 // new material(vec4(1, 0, 0, 1)),
-		 // true, player_mass,
-		 // new btCapsuleShape(0.25f, player_height)
-	  //); 
+	  mesh_instance *mi2 = app_scene->add_shape(
+		  mat,
+		  new mesh_sphere(vec3(0), player_radius),
+		  new material(vec4(1, 0, 0, 1)),
+		  true, player_mass,
+		  new btCapsuleShape(0.25f, player_height)
+	  ); 
 
 
-	  //player_node = mi2->get_node();
-	  //player_index = player_node->get_rigid_body()->getUserIndex();
-
-	  //big purple box
-	  mat.loadIdentity();
-	  mat.translate(vec3(30, 1, 0));
-	  mesh_instance *mi3 = app_scene->add_shape(mat, new mesh_box(vec3(2)), new material(vec4(0.2, 0.1, 0.5, 1)), false);
-	  jukebox_index = mi3->get_node()->get_rigid_body()->getUserIndex();
+	  player_node = mi2->get_node();
+	  player_index = player_node->get_rigid_body()->getUserIndex();
 
 	  create_bridge();
 	  create_springs();
 
-	  sound = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
-	  sound_source = 0;
-	  alGenSources(num_sound_sources, sources);
-	  can_play_sound = true;
+
+	  ////big purple box
+	  //mat.loadIdentity();
+	  //mat.translate(vec3(30, 1, 0));
+	  //mesh_instance *mi3 = app_scene->add_shape(mat, new mesh_box(vec3(2)), new material(vec4(0.2, 0.1, 0.5, 1)), false);
+	  //jukebox_index = mi3->get_node()->get_rigid_body()->getUserIndex();
+
+	  //sound = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
+	  //sound_source = 0;
+	  //alGenSources(num_sound_sources, sources);
+	  //can_play_sound = true;
 
     }
 
@@ -158,27 +181,27 @@ namespace octet {
 		mat4t mtw; //could call it mat too?
 		mtw.loadIdentity();
 		mtw.translate(vec3(0, 0.5f, 0));
-		mesh_instance *b1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
+		mesh_instance *b1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), red, false);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(1.6f, 1.25f, 0.0f));
-		mesh_instance *p1 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true, 10.0f);
+		mesh_instance *p1 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), green, true, 10.0f);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(2.7f, 1.25f, 0.0f));
-		mesh_instance *p2 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true, 10.0f);
+		mesh_instance *p2 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), green, true, 10.0f);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(3.8f, 1.25f, 0.0f));
-		mesh_instance *p3 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 0, 1)), true, 10.0f);
+		mesh_instance *p3 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), green, true, 10.0f);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(4.9f, 1.25f, 0.0f));
-		mesh_instance *p4 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), new material(vec4(0, 1, 1, 1)), true, 10.0f);
+		mesh_instance *p4 = app_scene->add_shape(mtw, new mesh_box(vec3(0.5f, 0.25f, 1)), green, true, 10.0f);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(6.5f, 0.5f, 0.0f));
-		mesh_instance *b2 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
+		mesh_instance *b2 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), red, false);
 
 		//hinges
 
@@ -186,31 +209,31 @@ namespace octet {
 			btVector3(1.0f, 0.5f, 0.0f), btVector3(-0.5f, 0.5f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		//c1->setLimit(-PI * 0.1f, PI* 0.1f);
-		dynamics_world->addConstraint(c1);
+		physicalWorld->addConstraint(c1);
 
 		btHingeConstraint *c2 = new btHingeConstraint(*(p1->get_node()->get_rigid_body()), *(p2->get_node()->get_rigid_body()),
 			btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.5f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		//c2->setLimit(-PI * 0.1f, PI* 0.1f);
-		dynamics_world->addConstraint(c2);
+		physicalWorld->addConstraint(c2);
 
 		btHingeConstraint *c3 = new btHingeConstraint(*(p2->get_node()->get_rigid_body()), *(p3->get_node()->get_rigid_body()),
 			btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.5f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		//c3->setLimit(-PI * 0.1f, PI* 0.1f);
-		dynamics_world->addConstraint(c3);
+		physicalWorld->addConstraint(c3);
 
 		btHingeConstraint *c4 = new btHingeConstraint(*(p3->get_node()->get_rigid_body()), *(p4->get_node()->get_rigid_body()),
 			btVector3(0.5f, 0.5f, 0.0f), btVector3(-0.5f, 0.5f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		//c4->setLimit(-PI * 0.1f, PI* 0.1f);
-		dynamics_world->addConstraint(c4);
+		physicalWorld->addConstraint(c4);
 
 		btHingeConstraint *c5 = new btHingeConstraint(*(p4->get_node()->get_rigid_body()), *(b2->get_node()->get_rigid_body()),
 			btVector3(0.5f, 0.5f, 0.0f), btVector3(-1.0f, 0.5f, 0.0f),
 			btVector3(0, 0, 1), btVector3(0, 0, 1), false);
 		//c5->setLimit(-PI * 0.1f, PI* 0.1f);
-		dynamics_world->addConstraint(c5);
+		physicalWorld->addConstraint(c5);
 
 	}
 
@@ -241,7 +264,7 @@ namespace octet {
 		c1->setAngularLowerLimit(btVector3(-1.5f, -1.5f, -1.5f));
 		c1->setAngularUpperLimit(btVector3(1.5f, 1.5f, 1.5f));
 
-		dynamics_world->addConstraint(c1, false);
+		physicalWorld->addConstraint(c1, false);
 
 		c1->setDbgDrawSize(btScalar(5.f));
 		c1->enableSpring(0.0f, true);
@@ -251,50 +274,52 @@ namespace octet {
 	}
 
 
-	/*void shoot() {
-		mat4t mtw;
-		mtw.translate(main_camera->get_node()->get_position());
-		bullet b = bullet(app_scene->add_shape(mtw, new mesh_sphere(vec3(1), 0.2f), new material(vec4(1, 0, 0.8f, 1)), true, 0.01f));
-		vec3 fwd = -main_camera->get_node()->get_z();
-		b.get_mesh_instance().get_node()->apply_central_force(fwd*30.0f);
-		bullets.push_back(b);
-	}
 
-	void bullet_cleanup() {
-		for (unsigned int i = 0; i < bullets.size(); ++i) {
-			if (bullets[i].get_timer() > 150) {
-				app_scene->delete_mesh_instance(bullets[i].getp_mesh_instance());
-				bullets[i] = bullets[bullets.size() - 1];
-				bullets.resize(bullets.size() - 1);
-			}
-		}
-	}*/
+	//void shoot() {
+	//	mat4t mtw;
+	//	mtw.translate(main_camera->get_node()->get_position());
+	//	bullet b = bullet(app_scene->add_shape(mtw, new mesh_sphere(vec3(1), 0.2f), new material(vec4(1, 0, 0.8f, 1)), true, 0.01f));
+	//	vec3 fwd = -main_camera->get_node()->get_z();
+	//	b.get_mesh_instance().get_node()->apply_central_force(fwd*30.0f);
+	//	bullets.push_back(b);
+	//}
 
-	ALuint get_sound_source() {
-		sound_source = sound_source % num_sound_sources;
-		sound_source++;
-		return sources[sound_source];
-	}
+	//void bullet_cleanup() {
+	//	for (unsigned int i = 0; i < bullets.size(); ++i) {
+	//		if (bullets[i].get_timer() > 150) {
+	//			app_scene->delete_mesh_instance(bullets[i].getp_mesh_instance());
+	//			bullets[i] = bullets[bullets.size() - 1];
+	//			bullets.resize(bullets.size() - 1);
+	//		}
+	//	}
+	//}
 
-	void check_collisions() {
-		int num_manifolds = dynamics_world->getDispatcher()->getNumManifolds();
-		for (unsigned int i = 0; i < num_manifolds; ++i) {
-			btPersistentManifold *manifold = dynamics_world->getDispatcher()->getManifoldByIndexInternal(i);
-			int index0 = manifold->getBody0()->getUserIndex();
-			int index1 = manifold->getBody1()->getUserIndex();
+	//ALuint get_sound_source() {
+	//	sound_source = sound_source % num_sound_sources;
+	//	sound_source++;
+	//	return sources[sound_source];
+	//}
 
-			if (index0 == player_index || index1 == player_index) {
-				if (index0 == jukebox_index || index1 == jukebox_index) {
-					if (can_play_sound) {
-						ALuint source = get_sound_source();
-						alSourcei(source, AL_BUFFER, sound);
-						alSourcePlay(source);
-						can_play_sound = false;
-					}
-				}
-			}
-		}
-	}
+
+	//void check_collisions() {
+	//	int num_manifolds = physicalWorld->getDispatcher()->getNumManifolds();
+	//	for (unsigned int i = 0; i < num_manifolds; ++i) {
+	//		btPersistentManifold *manifold = physicalWorld->getDispatcher()->getManifoldByIndexInternal(i);
+	//		int index0 = manifold->getBody0()->getUserIndex();
+	//		int index1 = manifold->getBody1()->getUserIndex();
+
+	//		if (index0 == player_index || index1 == player_index) {
+	//			if (index0 == jukebox_index || index1 == jukebox_index) {
+	//				if (can_play_sound) {
+	//					ALuint source = get_sound_source();
+	//					alSourcei(source, AL_BUFFER, sound);
+	//					alSourcePlay(source);
+	//					can_play_sound = false;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 
     /// this is called to draw the world
@@ -303,9 +328,9 @@ namespace octet {
       get_viewport_size(vx, vy);
       app_scene->begin_render(vx, vy);
 
-	  //if (is_key_going_down(key_lmb)) {
-		 // shoot();
-	  //}
+	/*  if (is_key_going_down(key_lmb)) {
+		  shoot();
+	  }*/
 	  
 
 	  //zoom in
@@ -327,32 +352,43 @@ namespace octet {
 	  if (is_key_down(key_left)) {
 		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(-0.5f, 0, 0.0f));
 	  }
-	  //move up
-	  if (is_key_down(key_lmb)) {
-		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.5f, 0.0f));
-	  }
-	  //move down
-	  if (is_key_down(key_rmb)) {
-		  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, -0.5f, 0.0f));
-	  }
+	  ////move up
+	  //if (is_key_down(key_lmb)) {
+		 // app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.5f, 0.0f));
+	  //}
+	  ////move down
+	  //if (is_key_down(key_rmb)) {
+		 // app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, -0.5f, 0.0f));
+	  //}
+
+	  ////Test 
+	  //if (is_key_down(key_space)) {
+		 // mat4t mtw;
+		 // mtw.translate(3,1,10);
+		 // bullet b = bullet(app_scene->add_shape(mtw, new mesh_sphere(vec3(1), 0.2f), new material(vec4(1, 0, 0.8f, 1)), true, 0.01f));
+		 // vec3 fwd = -main_camera->get_node()->get_z();
+		 // b.get_mesh_instance().get_node()->apply_central_force(fwd*30.0f);
+		 // bullets.push_back(b);
+	  //}
+
 
 	  //TEST
-	  if (is_key_down(key_mmb)) {
-		  ALuint source = get_sound_source();
-		  alSourcei(source, AL_BUFFER, sound);
-		  alSourcePlay(source);
+	  //if (is_key_down(key_mmb)) {
+		 // ALuint source = get_sound_source();
+		 // alSourcei(source, AL_BUFFER, bang);
+		 // alSourcePlay(source);
 
-	  }
+	  //}
 	 
 
 
 	  //bullet_cleanup();
 
-	  check_collisions();
+	/*  check_collisions();*/
 
 	  if (++frame_count > 100) {
 		  frame_count = 0;
-		  can_play_sound = true;
+		  //can_play_sound = true;
 	  }
 
 	  //update camera
@@ -360,7 +396,7 @@ namespace octet {
 	  mat4t &camera_to_world = camera_node->access_nodeToParent();
 	  moving_mouse_view.update(camera_to_world);
 
-	  //fps_helper.update(player_node, camera_node);
+	  fps_helper.update(player_node, camera_node);
 
       // update matrices. assume 30 fps.
       app_scene->update(1.0f/30);
