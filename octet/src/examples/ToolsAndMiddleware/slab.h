@@ -20,22 +20,26 @@ namespace octet {
 		btRigidBody *rigidbody;
 		btMotionState *motion_state;
 
+		//test
+		vec3 translate;
+
 	public:
 		slab() {
 
 		}
-
-		slab(mat4t mtw, vec3 size, material *mat, btScalar mass) {
-			init(mtw, size, mat, mass);
+		//test adding trans
+		slab(mat4t mtw, vec3 size, vec3 trans, material *mat, btScalar mass) {
+			init(mtw, size, trans, mat, mass);
 		}
 
 		~slab() {
 
 		}
-
-		void init(mat4t_in mtw, vec3 size, material *mat, btScalar mass = 1.0f) {
+		//test adding trans
+		void init(mat4t_in mtw, vec3 size, vec3 trans, material *mat, btScalar mass = 1.0f) {
 			model_to_world = mtw;
 			slab_size = size;
+			translate = trans; //test
 			slab_material = mat;
 			slab_mass = mass;
 			btMatrix3x3 matrix(get_btMatrix3x3(model_to_world));
@@ -66,6 +70,11 @@ namespace octet {
 		material* get_material() {
 			return slab_material;
 		}
+		//test
+		vec3 get_translate() {
+			return translate;
+		}
+
 	};
 
 

@@ -6,7 +6,8 @@
 //
 
 
-//#include "slab.h";
+#include "slab.h";
+#include <array>;
 
 namespace octet {
 
@@ -56,6 +57,12 @@ namespace octet {
 
 	/* storing all bullets so we can do clean-up*/
 	dynarray<bullet> bullets;
+
+	//storing all the slabs
+	dynarray<slab> slabs;
+
+	//Test storing strings to identify slabs
+	dynarray<string> slab_id;
 
 	// jukebox (plays sound when you hit it)
 	int jukebox_index;
@@ -124,6 +131,13 @@ namespace octet {
 		  pink, false, 0);
 	  btRigidBody *rb = mi->get_node()->get_rigid_body();
 
+	 //test array;
+	  string deck = "deck";
+	  string plank = "plank";	  
+	  slab_id.push_back(deck);
+	  slab_id.push_back(plank);
+	  
+	  
 	  //TEST DOOR
 	  mat.loadIdentity();
 	  mat.translate(vec3(-9.0f, 1.0f, 0.0f));
@@ -159,9 +173,9 @@ namespace octet {
 	  player_node = mi2->get_node();
 	  player_index = player_node->get_rigid_body()->getUserIndex();
 
-	  create_bridge();
+	  //create_bridge();
 	  create_springs();
-
+	  create_bridge_alternative();
 
 	  ////big purple box
 	  //mat.loadIdentity();
@@ -176,12 +190,47 @@ namespace octet {
 
     }
 
+	//testing alternative create bridge
+
+	void create_bridge_alternative() {
+		mat4t mtw;
+		
+		slab deck = slab(mtw, vec3(1, 1, 1), vec3(4, 5.5f, 0), black, 0);
+		slab plank = slab(mtw, vec3(0.5f, 0.25f, 1), vec3(7, 5.5f, 0), red, 0);
+
+
+		for (int i = 0; i < slab_id.size(); i++) {
+			mtw.loadIdentity();
+			if (slab_id[i] == "deck") {
+				mtw.translate(deck.get_translate()); //fix
+				
+				mesh_instance *s1 = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), false);
+			}
+			else if (slab_id[i] == "plank") {
+				mtw.translate(plank.get_translate());
+				
+				mesh_instance *s2 = app_scene->add_shape(mtw, plank.get_mesh(), plank.get_material(), false);
+			}
+		}
+
+	}
+	
+	
+	
 	void create_bridge() {
 	
 		mat4t mtw; //could call it mat too?
 		mtw.loadIdentity();
 		mtw.translate(vec3(0, 0.5f, 0));
 		mesh_instance *b1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), red, false);
+
+		//testing reading slabs from header file
+		//slab s = slab(mtw, vec3(1, 1, 1), black, 0);
+		//mtw.loadIdentity();
+		//mtw.translate(vec3(4, 5.5f, 0));
+		//mesh_instance *s1 = app_scene->add_shape(mtw, s.get_mesh(), s.get_material(), false);
+
+		//slabs.push_back(s);
 
 		mtw.loadIdentity();
 		mtw.translate(vec3(1.6f, 1.25f, 0.0f));
