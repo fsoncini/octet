@@ -6,12 +6,60 @@
 //
 
 
-#include "slab.h";
+#include "slab.h"; //test, maybe not needed
 #include <array>;
 
 namespace octet {
 
 
+	class ReadCsv {
+		//test implementation to read csv into variable
+
+		//store data from text file in variables. At the end I should have a version of {'D', 'p', 'p', 'D'} etc
+		
+	public:
+		dynarray<char> variables;
+
+		void read_csv_data(dynarray<uint8_t> file_content) {
+			
+			dynarray<uint8_t> clean_data;
+
+			for each(uint8_t c in file_content) {
+				if (c != ' ' && c != '\n' && c != '\r') {
+					clean_data.push_back(c);
+				}
+			}
+
+			// get variables
+			for (unsigned int cursor = 0; cursor < clean_data.size(); ++cursor) {
+				char current_char = clean_data[cursor];
+				if (current_char == ';') {
+					break;
+				}
+				else if (current_char == ',') {
+					continue;
+				}
+				else {
+					variables.push_back(current_char);
+				}
+			}
+		}
+
+		ReadCsv() {
+		};
+
+		void read_file() {
+			dynarray<uint8_t> file_content;
+			std::string file_name = "assets/bridges.txt";
+			app_utils::get_url(file_content, file_name.c_str());
+
+			read_csv_data(file_content);
+		}
+
+	};
+
+
+	
 	class bullet {
 		mesh_instance *mi;
 		int timer;
@@ -58,20 +106,8 @@ namespace octet {
 	/* storing all bullets so we can do clean-up*/
 	dynarray<bullet> bullets;
 
-	//storing all the slabs
-	/*dynarray<slab> slabs;*/
-
 	//Test storing strings to identify slabs
-	dynarray<uint8_t> slab_id;
-	uint8_t D = 'D';
-	uint8_t p = 'p';
-	uint8_t c = 'C';
-
-	char fede_array[3] = { 'D', 'p', 'C' };
-
-	//test
-	dynarray<mesh_instance> decks;
-
+	/*char fede_array[3] = { 'D', 'p', 'C' };*/
 
 	// jukebox (plays sound when you hit it)
 	int jukebox_index;
@@ -90,6 +126,8 @@ namespace octet {
 	//ALuint sources[32];
 	//bool can_play_sound;
 
+	
+
 	int frame_count = 0;
 
 	//terrain 
@@ -102,14 +140,15 @@ namespace octet {
 	};
 	terrain_mesh_source terrain_source;
 
+	ReadCsv rcsv;
 
   public:
     /// this is called when we construct the class before everything is initialised.
     ToolsAndMiddleware(int argc, char **argv) : app(argc, argv) {
+	
     }
 
 	
-	//material *pink = new material(vec4(255, 1, 255, 1));
 
     /// this is called once OpenGL is initialized
     void app_init() {
@@ -138,23 +177,11 @@ namespace octet {
 	  mat.loadIdentity();
 	  mesh_instance *mi = app_scene->add_shape( mat, new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source),
 		  pink, false, 0);
-	  btRigidBody *rb = mi->get_node()->get_rigid_body();
-
-	 //test array;
-	  //string deck = "deck";
-	  //string plank = "plank";	  
-	  //slab_id.push_back(deck);
-	  //slab_id.push_back(plank);
-
-	  //test creating arrays of slabs and decks
-
-
-	/*  for (int i = 0; i < 2; i++) {
-		  slab_id.push_back(D);
-	  }*/
-	  
+	  btRigidBody *rb = mi->get_node()->get_rigid_body();	  
 
 	  
+	  rcsv.read_file();
+
 	  //TEST DOOR
 	  mat.loadIdentity();
 	  mat.translate(vec3(-9.0f, 1.0f, 0.0f));
@@ -170,6 +197,7 @@ namespace octet {
 	  //c1->setLimit(-PI * 0.1f, PI* 0.1f);
 	  physicalWorld->addConstraint(d);
 	  
+	  //player fps specks
 	  float player_height = 1.8f;
 	  float player_radius = 0.25f;
 	  float player_mass = 90.0f;
@@ -191,7 +219,7 @@ namespace octet {
 	  player_index = player_node->get_rigid_body()->getUserIndex();
 
 	  //create_bridge();
-	  create_springs();
+	  //create_springs();
 	  create_bridge_alternative();
 
 	  ////big purple box
@@ -214,52 +242,47 @@ namespace octet {
 
 	void create_bridge_alternative() {
 	
-		int deck_size;
 		mat4t mat;
-		
+		slab deck = slab(mat, vec3(1, 1, 1), vec3(4, 6.0f, 0), black, 0);
 		slab plank = slab(mat, vec3(0.5f, 0.25f, 1), vec3(7, 5.5f, 0), red, 0);
-		vec3 increment = (0, 0, 0);
 
-		for (int i = 0; i < 3; i++) {
-			
-			
 
-			if (fede_array[i] == 'C') {
+		for (int i = 0; i < rcsv.variables.size(); i++) {
+			
+			if (rcsv.variables[i] == 'D') {
+		
 				mat4t mtw;
 				mtw.loadIdentity();
-				slab deck = slab(mtw, vec3(1, 1, 1), vec3(0, 0.0f,0), black, 0);
-				deck_size++;
-				
 			
-
-
-				//mtw.translate(deck.get_translate() + increment); //fix
+				mtw.translate(deck.get_translate()); //fix
+				mesh_instance *dl = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), false);
 				
-				//mesh_instance *dl = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), false);
-				
-
-				
-			
+	
 			}
-			else if (fede_array[i] == 'p') {
+
+			else if (rcsv.variables[i] == 's') {
 				mat4t mtw;
 				mtw.loadIdentity();
-				
 						
 				mtw.translate(plank.get_translate());
 				
-				
 				mesh_instance *s2 = app_scene->add_shape(mtw, plank.get_mesh(), plank.get_material(), false);
-				
+			
 			}
 		}
 
-		for (int i = 0; i < deck_size; i++) {
-
-		}
 
 	}
 	
+
+	//test
+	//void CreateDeckInstance(vec3 translate) {
+	//	mat4t mat;
+
+	//	slab deck = slab(mat, vec3(1, 1, 1), translate, black, 0);
+
+
+	//}
 	
 	
 	void create_bridge() {
