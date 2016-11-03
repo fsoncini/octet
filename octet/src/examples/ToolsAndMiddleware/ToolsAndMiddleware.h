@@ -30,7 +30,7 @@ namespace octet {
 				}
 			}
 
-			// get variables
+			// get list of ids for Bridge parts
 			for (unsigned int cursor = 0; cursor < clean_data.size(); ++cursor) {
 				char current_char = clean_data[cursor];
 				if (current_char == ';') {
@@ -148,8 +148,6 @@ namespace octet {
 	
     }
 
-	
-
     /// this is called once OpenGL is initialized
     void app_init() {
       app_scene =  new visual_scene();
@@ -178,8 +176,8 @@ namespace octet {
 	  mesh_instance *mi = app_scene->add_shape( mat, new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source),
 		  pink, false, 0);
 	  btRigidBody *rb = mi->get_node()->get_rigid_body();	  
-
-	  
+ 
+	  //read csv file
 	  rcsv.read_file();
 
 	  //TEST DOOR
@@ -234,41 +232,57 @@ namespace octet {
 	  //can_play_sound = true;
 
     }
-
-	
-	
-	
+		
 	//testing alternative create bridge
 
 	void create_bridge_alternative() {
 	
-		mat4t mat;
-		slab deck = slab(mat, vec3(1, 1, 1), vec3(4, 6.0f, 0), black, 0);
-		slab plank = slab(mat, vec3(0.5f, 0.25f, 1), vec3(7, 5.5f, 0), red, 0);
-
+	
+		mesh_instance *slabs[20];
+		
+		
+		float increment_deck = 0.0f;
+		float increment_plank = 0.0f;
+		
+		float plank_x = 0.0f;
+		float deck_x = 0.0f;
 
 		for (int i = 0; i < rcsv.variables.size(); i++) {
-			
+			mat4t mtw;
+			mtw.loadIdentity();
+
+
+
 			if (rcsv.variables[i] == 'D') {
-		
-				mat4t mtw;
-				mtw.loadIdentity();
-			
-				mtw.translate(deck.get_translate()); //fix
-				mesh_instance *dl = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), false);
 				
-	
-			}
+		/*		mat4t mtw;
+				mtw.loadIdentity();*/
+				slab deck = slab(mtw, vec3(1, 1, 1), vec3(deck_x + increment_deck, 0.5f, 0), black, 0);
+				mtw.translate(deck.get_translate()); 
+				
+				slabs[i] = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), true);
+				increment_deck = plank_x;
+			} 
 
 			else if (rcsv.variables[i] == 's') {
-				mat4t mtw;
-				mtw.loadIdentity();
-						
-				mtw.translate(plank.get_translate());
+				/*mat4t mtw;
+				mtw.loadIdentity();*/
+				slab plank = slab(mtw, vec3(0.5f, 0.25f, 1), vec3(plank_x + increment_plank, 1.25f, 0), red, 0);
 				
-				mesh_instance *s2 = app_scene->add_shape(mtw, plank.get_mesh(), plank.get_material(), false);
+				mtw.translate(plank.get_translate());
+				plank_x = plank.get_x();
+				slabs[i] = app_scene->add_shape(mtw, plank.get_mesh(), plank.get_material(), false);
+			
+				increment_plank += 1.1f;
 			
 			}
+
+			
+			
+			//increment_deck += 0.4f;
+			
+
+
 		}
 
 

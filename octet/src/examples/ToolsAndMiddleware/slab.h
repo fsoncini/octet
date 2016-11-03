@@ -76,7 +76,7 @@ namespace octet {
 		}
 
 		//test
-		vec3 get_x() {
+		float get_x() {
 			return translate.x();			
 		}
 
