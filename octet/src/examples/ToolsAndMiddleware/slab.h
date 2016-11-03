@@ -75,6 +75,11 @@ namespace octet {
 			return translate;
 		}
 
+		//test
+		vec3 get_x() {
+			return translate.x();			
+		}
+
 	};
 
 

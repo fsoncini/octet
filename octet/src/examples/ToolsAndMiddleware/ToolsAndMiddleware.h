@@ -59,10 +59,19 @@ namespace octet {
 	dynarray<bullet> bullets;
 
 	//storing all the slabs
-	dynarray<slab> slabs;
+	/*dynarray<slab> slabs;*/
 
 	//Test storing strings to identify slabs
-	dynarray<string> slab_id;
+	dynarray<uint8_t> slab_id;
+	uint8_t D = 'D';
+	uint8_t p = 'p';
+	uint8_t c = 'C';
+
+	char fede_array[3] = { 'D', 'p', 'C' };
+
+	//test
+	dynarray<mesh_instance> decks;
+
 
 	// jukebox (plays sound when you hit it)
 	int jukebox_index;
@@ -132,11 +141,19 @@ namespace octet {
 	  btRigidBody *rb = mi->get_node()->get_rigid_body();
 
 	 //test array;
-	  string deck = "deck";
-	  string plank = "plank";	  
-	  slab_id.push_back(deck);
-	  slab_id.push_back(plank);
+	  //string deck = "deck";
+	  //string plank = "plank";	  
+	  //slab_id.push_back(deck);
+	  //slab_id.push_back(plank);
+
+	  //test creating arrays of slabs and decks
+
+
+	/*  for (int i = 0; i < 2; i++) {
+		  slab_id.push_back(D);
+	  }*/
 	  
+
 	  
 	  //TEST DOOR
 	  mat.loadIdentity();
@@ -190,27 +207,55 @@ namespace octet {
 
     }
 
+	
+	
+	
 	//testing alternative create bridge
 
 	void create_bridge_alternative() {
-		mat4t mtw;
+	
+		int deck_size;
+		mat4t mat;
 		
-		slab deck = slab(mtw, vec3(1, 1, 1), vec3(4, 5.5f, 0), black, 0);
-		slab plank = slab(mtw, vec3(0.5f, 0.25f, 1), vec3(7, 5.5f, 0), red, 0);
+		slab plank = slab(mat, vec3(0.5f, 0.25f, 1), vec3(7, 5.5f, 0), red, 0);
+		vec3 increment = (0, 0, 0);
 
+		for (int i = 0; i < 3; i++) {
+			
+			
 
-		for (int i = 0; i < slab_id.size(); i++) {
-			mtw.loadIdentity();
-			if (slab_id[i] == "deck") {
-				mtw.translate(deck.get_translate()); //fix
+			if (fede_array[i] == 'C') {
+				mat4t mtw;
+				mtw.loadIdentity();
+				slab deck = slab(mtw, vec3(1, 1, 1), vec3(0, 0.0f,0), black, 0);
+				deck_size++;
 				
-				mesh_instance *s1 = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), false);
+			
+
+
+				//mtw.translate(deck.get_translate() + increment); //fix
+				
+				//mesh_instance *dl = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), false);
+				
+
+				
+			
 			}
-			else if (slab_id[i] == "plank") {
+			else if (fede_array[i] == 'p') {
+				mat4t mtw;
+				mtw.loadIdentity();
+				
+						
 				mtw.translate(plank.get_translate());
 				
+				
 				mesh_instance *s2 = app_scene->add_shape(mtw, plank.get_mesh(), plank.get_material(), false);
+				
 			}
+		}
+
+		for (int i = 0; i < deck_size; i++) {
+
 		}
 
 	}
@@ -328,7 +373,7 @@ namespace octet {
 	//	mat4t mtw;
 	//	mtw.translate(main_camera->get_node()->get_position());
 	//	bullet b = bullet(app_scene->add_shape(mtw, new mesh_sphere(vec3(1), 0.2f), new material(vec4(1, 0, 0.8f, 1)), true, 0.01f));
-	//	vec3 fwd = -main_camera->get_node()->get_z();
+	//vec3 fwd = -main_camera->get_node()->get_z();
 	//	b.get_mesh_instance().get_node()->apply_central_force(fwd*30.0f);
 	//	bullets.push_back(b);
 	//}
