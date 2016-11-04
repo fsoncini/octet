@@ -369,8 +369,19 @@ namespace octet {
 
 	void InputManager() {
 
+		//shoot
 		if (is_key_going_down(key_f1)) {
 			shoot();
+		}
+
+		//zoom in
+		if (is_key_down(key_shift)) {
+			app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, -1.5f));
+		}
+		
+		//zoom out
+		if (is_key_down(key_ctrl)) {
+			app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 0, 1.5f));
 		}
 		//move up
 		if (is_key_down(key_up)) {
