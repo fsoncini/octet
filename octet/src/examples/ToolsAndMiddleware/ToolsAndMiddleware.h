@@ -236,67 +236,49 @@ namespace octet {
 	//testing alternative create bridge
 
 	void create_bridge_alternative() {
-	
-	
-		mesh_instance *slabs[20];
-		
-		
-		float increment_deck = 0.0f;
-		float increment_plank = 0.0f;
-		
-		float plank_x = 0.0f;
-		float deck_x = 0.0f;
 
+		mesh_instance *slabs[20];
+		btHingeConstraint *hinges[20];
+		
+		float deck_x = 0.0f;
+		float plank_x = 0.0f;
+		float increment_deck = 0.0f;
+		float increment_plank = 0.0f;	
+		
+		//create and add meshes read from Csv file
 		for (int i = 0; i < rcsv.variables.size(); i++) {
 			mat4t mtw;
 			mtw.loadIdentity();
 
-
-
 			if (rcsv.variables[i] == 'D') {
-				
-		/*		mat4t mtw;
-				mtw.loadIdentity();*/
 				slab deck = slab(mtw, vec3(1, 1, 1), vec3(deck_x + increment_deck, 0.5f, 0), black, 0);
 				mtw.translate(deck.get_translate()); 
-				
-				slabs[i] = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), true);
-				increment_deck = plank_x;
+				deck_x = deck.get_x();
+				slabs[i] = app_scene->add_shape(mtw, deck.get_mesh(), deck.get_material(), false);
+				increment_deck += 6.5f; //add or subtract here
 			} 
 
 			else if (rcsv.variables[i] == 's') {
-				/*mat4t mtw;
-				mtw.loadIdentity();*/
-				slab plank = slab(mtw, vec3(0.5f, 0.25f, 1), vec3(plank_x + increment_plank, 1.25f, 0), red, 0);
-				
+				slab plank = slab(mtw, vec3(0.5f, 0.25f, 1), vec3(deck_x + 1.6f + increment_plank, 1.25f, 0), red, 0);
 				mtw.translate(plank.get_translate());
 				plank_x = plank.get_x();
-				slabs[i] = app_scene->add_shape(mtw, plank.get_mesh(), plank.get_material(), false);
-			
-				increment_plank += 1.1f;
-			
+				slabs[i] = app_scene->add_shape(mtw, plank.get_mesh(), plank.get_material(), true);
+				increment_plank += 1.1f;			
 			}
-
-			
-			
-			//increment_deck += 0.4f;
-			
-
-
 		}
-
-
+		
+		// create hinges
+		for (int i = 0; i < rcsv.variables.size()-1; i++) {
+			hinges[i] = new btHingeConstraint(*(slabs[i]->get_node()->get_rigid_body()), *(slabs[i + 1]->get_node()->get_rigid_body()),
+				btVector3(0.5f, 0.125f, 0.0f), btVector3(-0.5f, 0.125f, 0.0f),
+				btVector3(0, 0, 1), btVector3(0, 0, 1), false);
+			hinges[i]->setLimit(-PI * 0.1f, PI* 0.1f);
+			physicalWorld->addConstraint(hinges[i]);
+		}
 	}
 	
 
-	//test
-	//void CreateDeckInstance(vec3 translate) {
-	//	mat4t mat;
 
-	//	slab deck = slab(mat, vec3(1, 1, 1), translate, black, 0);
-
-
-	//}
 	
 	
 	void create_bridge() {
