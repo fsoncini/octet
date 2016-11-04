@@ -210,7 +210,7 @@ namespace octet {
 	  //player_index = player_node->get_rigid_body()->getUserIndex();
 
 
-	  create_springs();
+	  MakeSprings();
 	  MakeBridge();
 
 	  ////big purple box
@@ -271,12 +271,12 @@ namespace octet {
 	}
 	
 
-	void create_springs() {
+	void MakeSprings() {
 
 		mat4t mtw;
-		mtw.translate(-3, 10, 0);
+		mtw.translate(-5, 10, 0);
 		btRigidBody *rb1 = NULL;
-		mesh_instance *mi1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
+		mesh_instance *mi1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1), false));
 		rb1 = mi1->get_node()->get_rigid_body();
 
 		mtw.loadIdentity();
@@ -408,15 +408,11 @@ namespace octet {
 		 app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, -0.5f, 0.0f));
 		}
 
-
-
-
 		//TEST
 		//if (is_key_down(key_mmb)) {
 		// ALuint source = get_sound_source();
 		// alSourcei(source, AL_BUFFER, bang);
 		// alSourcePlay(source);
-
 		//}
 
 	}
