@@ -177,20 +177,20 @@ namespace octet {
 	  //read csv file
 	  rcsv.read_file();
 
-	  //DOOR with hinges
-	  mat.loadIdentity();
-	  mat.translate(vec3(-9.0f, 1.0f, 0.0f));
-	  mesh_instance *k1 = app_scene->add_shape(mat, new mesh_box(vec3(0.2f, 4.0f, 0.2f)), blue, false);
+	  //DOOR with hinges test
+	  //mat.loadIdentity();
+	  //mat.translate(vec3(-9.0f, 1.0f, 0.0f));
+	  //mesh_instance *k1 = app_scene->add_shape(mat, new mesh_box(vec3(0.2f, 4.0f, 0.2f)), blue, false);
 
-	  mat.loadIdentity();
-	  mat.translate(vec3(-7.8f, 1.0f, 0.0f));
-	  mesh_instance *door = app_scene->add_shape(mat, new mesh_box(vec3(1.0f, 4.0f, 0.2f)), black, true);
+	  //mat.loadIdentity();
+	  //mat.translate(vec3(-7.8f, 1.0f, 0.0f));
+	  //mesh_instance *door = app_scene->add_shape(mat, new mesh_box(vec3(1.0f, 4.0f, 0.2f)), black, true);
 
-	  btHingeConstraint *d = new btHingeConstraint(*(k1->get_node()->get_rigid_body()), *(door->get_node()->get_rigid_body()),
-		  btVector3(0.1f, 2.0f, 0.2f), btVector3(-0.5f, 2.0f, 0.2f),
-		  btVector3(0, 2, 0), btVector3(0, 2, 0), false);
-	  //c1->setLimit(-PI * 0.1f, PI* 0.1f);
-	  physicalWorld->addConstraint(d);
+	  //btHingeConstraint *d = new btHingeConstraint(*(k1->get_node()->get_rigid_body()), *(door->get_node()->get_rigid_body()),
+		 // btVector3(0.1f, 2.0f, 0.2f), btVector3(-0.5f, 2.0f, 0.2f),
+		 // btVector3(0, 2, 0), btVector3(0, 2, 0), false);
+	  ////c1->setLimit(-PI * 0.1f, PI* 0.1f);
+	  //physicalWorld->addConstraint(d);
 	  
 	  //player fps dimensions
 	  float player_height = 1.8f;
@@ -210,7 +210,8 @@ namespace octet {
 	  //player_index = player_node->get_rigid_body()->getUserIndex();
 
 
-	  MakeSprings();
+	  create_springs();
+	  //MakeSprings();
 	  MakeBridge();
 
 	  ////big purple box
@@ -270,6 +271,41 @@ namespace octet {
 		}
 	}
 	
+	void create_springs() {
+		mat4t mtw;
+		mtw.translate(-3, 10, 0);
+		btRigidBody *rb1 = NULL;
+		mesh_instance *mi1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1)), false);
+		rb1 = mi1->get_node()->get_rigid_body();
+
+		mtw.loadIdentity();
+		mtw.translate(-5, 8, 0);
+		btRigidBody *rb2 = NULL;
+		mesh_instance *mi2 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(0, 1, 0, 1)), true, 1.0f);
+		rb2 = mi2->get_node()->get_rigid_body();
+
+		btTransform frameInA, frameInB;
+		frameInA = btTransform::getIdentity();
+		frameInA.setOrigin(btVector3(btScalar(0.0f), btScalar(-0.5f), btScalar(0.0f)));
+		frameInB = btTransform::getIdentity();
+		frameInB.setOrigin(btVector3(btScalar(0.0f), btScalar(0.5f), btScalar(0.0f)));
+
+		btGeneric6DofSpringConstraint *c1 = new btGeneric6DofSpringConstraint(*rb1, *rb2, frameInA, frameInB, true);
+		c1->setLinearUpperLimit(btVector3(0., 5.0f, 0.));
+		c1->setLinearLowerLimit(btVector3(0., -5.0f, 0.));
+
+		c1->setAngularLowerLimit(btVector3(-1.5f, -1.5f, 0));
+		c1->setAngularUpperLimit(btVector3(1.5f, 1.5f, 0));
+
+		physicalWorld->addConstraint(c1, false);
+
+		c1->setDbgDrawSize(btScalar(5.f));
+		c1->enableSpring(0, true);
+		c1->setStiffness(0, 10.0f);
+		c1->setDamping(0, 0.5f);
+	}
+
+
 
 	void MakeSprings() {
 
@@ -436,9 +472,9 @@ namespace octet {
 	  }
 
 	  //update camera
-	 /* scene_node *camera_node = main_camera->get_node();
+	  scene_node *camera_node = main_camera->get_node();
 	  mat4t &camera_to_world = camera_node->access_nodeToParent();
-	  moving_mouse_view.update(camera_to_world);*/
+	  moving_mouse_view.update(camera_to_world);
 
 	 /* fps_helper.update(player_node, camera_node);*/
 
