@@ -198,27 +198,27 @@ namespace octet {
 	  float player_mass = 90.0f;
 
 	  //sphere being shot FIX
-	  //mat.loadIdentity();
-	  //mat.translate(0.0f, player_height*6.0f, 30.0f);
+	  mat.loadIdentity();
+	  mat.translate(0.0f, player_height*6.0f, 30.0f);
 	
-	  //mesh_instance *mi2 = app_scene->add_shape( mat, new mesh_box(vec3(0.2f, 0.2f, 6.0f)),green,
-		 // true, player_mass,
-		 // new btCapsuleShape(0.25f, player_height)
-	  //); 
+	  mesh_instance *mi2 = app_scene->add_shape( mat, new mesh_box(vec3(0.2f, 0.2f, 6.0f)),green,
+		  true, player_mass,
+		  new btCapsuleShape(0.25f, player_height)
+	  ); 
 
-	  //player_node = mi2->get_node();
-	  //player_index = player_node->get_rigid_body()->getUserIndex();
+	  player_node = mi2->get_node();
+	  player_index = player_node->get_rigid_body()->getUserIndex();
 
 
-	  create_springs();
-	  //MakeSprings();
+	  //create_springs();
+	  MakeSprings();
 	  MakeBridge();
 
-	  ////big purple box
-	  //mat.loadIdentity();
-	  //mat.translate(vec3(30, 1, 0));
-	  //mesh_instance *mi3 = app_scene->add_shape(mat, new mesh_box(vec3(2)), new material(vec4(0.2, 0.1, 0.5, 1)), false);
-	  //jukebox_index = mi3->get_node()->get_rigid_body()->getUserIndex();
+	  //big purple box for SOUND and COLLISION purpose 
+	  mat.loadIdentity();
+	  mat.translate(vec3(30, 1, 0));
+	  mesh_instance *mi3 = app_scene->add_shape(mat, new mesh_box(vec3(2)), new material(vec4(0.2, 0.1, 0.5, 1)), false);
+	  jukebox_index = mi3->get_node()->get_rigid_body()->getUserIndex();
 
 	  sound = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
 	  sound_source = 0;
@@ -227,7 +227,6 @@ namespace octet {
 
     }
 		
-	//working. Rename after deleting create_bridge()
 
 	void MakeBridge () {
 
@@ -298,7 +297,7 @@ namespace octet {
 		c1->setAngularUpperLimit(btVector3(1.5f, 1.5f, 0));
 
 		physicalWorld->addConstraint(c1, false);
-
+		
 		c1->setDbgDrawSize(btScalar(5.f));
 		c1->enableSpring(0, true);
 		c1->setStiffness(0, 10.0f);
@@ -310,16 +309,16 @@ namespace octet {
 	void MakeSprings() {
 
 		mat4t mtw;
-		mtw.translate(-5, 10, 0);
-		btRigidBody *rb1 = NULL;
-		mesh_instance *mi1 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), new material(vec4(1, 0, 0, 1), false));
-		rb1 = mi1->get_node()->get_rigid_body();
+		mtw.translate(-3, 10, 0);
+		btRigidBody *rbAbove = NULL;
+		mesh_instance *miAbove = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), black, false);
+		rbAbove = miAbove->get_node()->get_rigid_body();
 
 		mtw.loadIdentity();
-		mtw.translate(-3, 8, 0);
-		btRigidBody *rb2 = NULL;
-		mesh_instance *mi2 = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), black, true, 1.0f);
-		rb2 = mi2->get_node()->get_rigid_body();
+		mtw.translate(-5, 8, 0);
+		btRigidBody *rbBelow = NULL;
+		mesh_instance *miBelow = app_scene->add_shape(mtw, new mesh_box(vec3(1, 1, 1)), red, true, 1.0f);
+		rbBelow = miBelow->get_node()->get_rigid_body();
 
 		btTransform frameInA, frameInB;
 		frameInA = btTransform::getIdentity();
@@ -327,9 +326,9 @@ namespace octet {
 		frameInB = btTransform::getIdentity();
 		frameInB.setOrigin(btVector3(btScalar(0.0f), btScalar(0.5f), btScalar(0.0f)));
 
-		btGeneric6DofSpringConstraint *c1 = new btGeneric6DofSpringConstraint(*rb2, *rb1, frameInA, frameInB, true);
-		c1->setLinearUpperLimit(btVector3(0.0f, 5.0f, 0.0f));
-		c1->setLinearLowerLimit(btVector3(0.0f, -5.0f, 0.0f));
+		btGeneric6DofSpringConstraint *c1 = new btGeneric6DofSpringConstraint(*rbAbove, *rbBelow, frameInA, frameInB, true);
+		c1->setLinearUpperLimit(btVector3(0., 5.0f, 0.));
+		c1->setLinearLowerLimit(btVector3(0., -5.0f, 0.));
 
 		c1->setAngularLowerLimit(btVector3(-1.5f, -1.5f, -1.5f));
 		c1->setAngularUpperLimit(btVector3(1.5f, 1.5f, 1.5f));
@@ -340,18 +339,19 @@ namespace octet {
 		c1->enableSpring(0.0f, true);
 		c1->setStiffness(0.0f, 10.0f);
 		c1->setDamping(0.0f, 0.5f);
-
 	}
+	
+	//possibly not use
 
-	void stick_cleanup() {
-		for (unsigned int i = 0; i < sticks.size(); ++i) {
-			if (sticks[i].get_timer() > 1/*150*/) {
-				app_scene->delete_mesh_instance(sticks[i].getp_mesh_instance());
-				sticks[i] = sticks[sticks.size() - 1];
-				sticks.resize(sticks.size() - 1);
-			}
-		}
-	}
+	//void stick_cleanup() {
+	//	for (unsigned int i = 0; i < sticks.size(); ++i) {
+	//		if (sticks[i].get_timer() > 1/*150*/) {
+	//			app_scene->delete_mesh_instance(sticks[i].getp_mesh_instance());
+	//			sticks[i] = sticks[sticks.size() - 1];
+	//			sticks.resize(sticks.size() - 1);
+	//		}
+	//	}
+	//}
 
 
 	void shoot() {
@@ -361,7 +361,7 @@ namespace octet {
 	vec3 fwd = -main_camera->get_node()->get_z();
 		s.get_mesh_instance().get_node()->apply_central_force(fwd*30.0f);
 		sticks.push_back(s);
-		stick_cleanup();
+		/*stick_cleanup();*/
 		//shoot_reset();
 	}
 
@@ -373,7 +373,7 @@ namespace octet {
 		return sources[sound_source];
 	}
 
-
+	//Collision Callbacks
 	void check_collisions() {
 		int num_manifolds = physicalWorld->getDispatcher()->getNumManifolds();
 		for (unsigned int i = 0; i < num_manifolds; ++i) {
@@ -394,6 +394,25 @@ namespace octet {
 		}
 	}
 
+	void CollisionCallbacks () {
+		int num_manifolds = physicalWorld->getDispatcher()->getNumManifolds();
+		for (unsigned int i = 0; i < num_manifolds; ++i) {
+			btPersistentManifold *manifold = physicalWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			int index0 = manifold->getBody0()->getUserIndex();
+			int index1 = manifold->getBody1()->getUserIndex();
+
+			if (index0 == player_index || index1 == player_index) {
+				if (index0 == jukebox_index || index1 == jukebox_index) {
+					if (can_play_sound) {
+						ALuint source = get_sound_source();
+						alSourcei(source, AL_BUFFER, sound);
+						alSourcePlay(source);
+						can_play_sound = false;
+					}
+				}
+			}
+		}
+	}
 
 	void InputManager() {
 
@@ -436,12 +455,12 @@ namespace octet {
 		 app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, -0.5f, 0.0f));
 		}
 
-		//TEST
-		//if (is_key_down(key_mmb)) {
-		// ALuint source = get_sound_source();
-		// alSourcei(source, AL_BUFFER, bang);
-		// alSourcePlay(source);
-		//}
+		//TEST SOUND CHECK
+		if (is_key_down(key_mmb)) {
+		 ALuint source = get_sound_source();
+		 alSourcei(source, AL_BUFFER, sound);
+		 alSourcePlay(source);
+		}
 
 	}
 
@@ -454,9 +473,10 @@ namespace octet {
 	  
 	  InputManager();
 
-	  stick_cleanup();
+	  //stick_cleanup();
 
-	 check_collisions();
+	 /*check_collisions();*/
+	 CollisionCallbacks();
 
 	  if (++frame_count > 100) {
 		  frame_count = 0;
