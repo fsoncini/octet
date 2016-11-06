@@ -119,11 +119,11 @@ namespace octet {
 	material *pink;
 	material *black;
 
-	//ALuint sound;
-	//unsigned int sound_source;
-	//unsigned int num_sound_sources = 32;
-	//ALuint sources[32];
-	//bool can_play_sound;
+	ALuint sound;
+	unsigned int sound_source;
+	unsigned int num_sound_sources = 32;
+	ALuint sources[32];
+	bool can_play_sound;
 
 	int frame_count = 0;
 
@@ -220,10 +220,10 @@ namespace octet {
 	  //mesh_instance *mi3 = app_scene->add_shape(mat, new mesh_box(vec3(2)), new material(vec4(0.2, 0.1, 0.5, 1)), false);
 	  //jukebox_index = mi3->get_node()->get_rigid_body()->getUserIndex();
 
-	  //sound = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
-	  //sound_source = 0;
-	  //alGenSources(num_sound_sources, sources);
-	  //can_play_sound = true;
+	  sound = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
+	  sound_source = 0;
+	  alGenSources(num_sound_sources, sources);
+	  can_play_sound = true;
 
     }
 		
@@ -343,14 +343,6 @@ namespace octet {
 
 	}
 
-	//void shoot_reset() {
-	//	mat4t mtw;
-	//	mtw.translate(main_camera->get_node()->get_position());
-	//	
-	//	bullet b.get_mesh_instance().get_node()->apply_central_force(fwd*30.0f);
-	//}
-
-
 	void stick_cleanup() {
 		for (unsigned int i = 0; i < sticks.size(); ++i) {
 			if (sticks[i].get_timer() > 1/*150*/) {
@@ -375,32 +367,32 @@ namespace octet {
 
 
 
-	//ALuint get_sound_source() {
-	//	sound_source = sound_source % num_sound_sources;
-	//	sound_source++;
-	//	return sources[sound_source];
-	//}
+	ALuint get_sound_source() {
+		sound_source = sound_source % num_sound_sources;
+		sound_source++;
+		return sources[sound_source];
+	}
 
 
-	//void check_collisions() {
-	//	int num_manifolds = physicalWorld->getDispatcher()->getNumManifolds();
-	//	for (unsigned int i = 0; i < num_manifolds; ++i) {
-	//		btPersistentManifold *manifold = physicalWorld->getDispatcher()->getManifoldByIndexInternal(i);
-	//		int index0 = manifold->getBody0()->getUserIndex();
-	//		int index1 = manifold->getBody1()->getUserIndex();
+	void check_collisions() {
+		int num_manifolds = physicalWorld->getDispatcher()->getNumManifolds();
+		for (unsigned int i = 0; i < num_manifolds; ++i) {
+			btPersistentManifold *manifold = physicalWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			int index0 = manifold->getBody0()->getUserIndex();
+			int index1 = manifold->getBody1()->getUserIndex();
 
-	//		if (index0 == player_index || index1 == player_index) {
-	//			if (index0 == jukebox_index || index1 == jukebox_index) {
-	//				if (can_play_sound) {
-	//					ALuint source = get_sound_source();
-	//					alSourcei(source, AL_BUFFER, sound);
-	//					alSourcePlay(source);
-	//					can_play_sound = false;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+			if (index0 == player_index || index1 == player_index) {
+				if (index0 == jukebox_index || index1 == jukebox_index) {
+					if (can_play_sound) {
+						ALuint source = get_sound_source();
+						alSourcei(source, AL_BUFFER, sound);
+						alSourcePlay(source);
+						can_play_sound = false;
+					}
+				}
+			}
+		}
+	}
 
 
 	void InputManager() {
@@ -464,7 +456,7 @@ namespace octet {
 
 	  stick_cleanup();
 
-	/*  check_collisions();*/
+	 check_collisions();
 
 	  if (++frame_count > 100) {
 		  frame_count = 0;
