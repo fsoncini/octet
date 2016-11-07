@@ -83,7 +83,7 @@ namespace octet {
 	dynarray<stick> sticks;
 
 	// jukebox (plays sound when you hit it)
-	int jukebox_index;
+	int soundTowerIndex;
 	int playerIndex;	
 	int doorIndex;
 
@@ -143,6 +143,7 @@ namespace octet {
 	  pink = new material(vec4(255, 1, 255, 1));
 	  black = new material(vec4(0, 0, 0, 1));
 
+
 	  //Create and add terrain background
 	  mat4t mat;
 	  mat.loadIdentity();
@@ -170,7 +171,7 @@ namespace octet {
 	  btHingeConstraint *d = new btHingeConstraint(*(k1->get_node()->get_rigid_body()), *(door->get_node()->get_rigid_body()),
 		  btVector3(0.1f, 2.0f, 0.2f), btVector3(-0.5f, 2.0f, 0.2f),
 		  btVector3(0, 2, 0), btVector3(0, 2, 0), false);
-	  //d->setLimit(-PI * 0.1f, PI* 0.1f);
+	  d->setLimit(-PI * 0.1f, PI* 0.1f);
 	  physicalWorld->addConstraint(d);
 	  
 	  //Declare dimensions for player fps pov
@@ -178,27 +179,29 @@ namespace octet {
 	  float player_radius = 0.25f;
 	  float player_mass = 90.0f;
 
-	  //Player And Shooter 
+	  //Player 
 	  mat.loadIdentity();
-	  mat.translate(0.0f, player_height*6.0f, 30.0f);
-	
-	  mesh_instance *mi2 = app_scene->add_shape( mat, new mesh_box(vec3(0.2f, 0.2f, 6.0f)),green,
+	  mat.translate(0.0f, player_height*6.0f, 50.0f);
+	  mesh_instance *playerInstance = app_scene->add_shape(
+		  mat,
+		  new mesh_sphere(vec3(0), player_radius),
+		  new material(vec4(1, 0, 0, 1)),
 		  true, player_mass,
 		  new btCapsuleShape(0.25f, player_height)
-	  ); 
-
-	  playerNode = mi2->get_node();
+	  );
+	  playerNode = playerInstance->get_node();
 	  playerIndex = playerNode->get_rigid_body()->getUserIndex();
 
 	  //Call functions to create springs and bridge
 	  MakeSprings();
 	  MakeBridge();
 
-	  //big purple box for SOUND and COLLISION purpose 
+	  //Create Tower for SOUND and COLLISION purpose 
 	  mat.loadIdentity();
 	  mat.translate(vec3(30, 1, 0));
-	  mesh_instance *mi3 = app_scene->add_shape(mat, new mesh_box(vec3(2)), new material(vec4(0.2, 0.1, 0.5, 1)), false);
-	  jukebox_index = mi3->get_node()->get_rigid_body()->getUserIndex();
+	  mesh_instance *soundTower = app_scene->add_shape(mat, new mesh_box(vec3(2,12,2)),
+		  blue, false);
+	  soundTowerIndex = soundTower->get_node()->get_rigid_body()->getUserIndex();
 
 	  sound = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
 	  soundSource = 0;
@@ -222,7 +225,7 @@ namespace octet {
 			int index1 = manifold->getBody1()->getUserIndex();
 
 			if (index0 == playerIndex || index1 == playerIndex) {
-				if (index0 == doorIndex || index1 == doorIndex) {
+				if (index0 == soundTowerIndex || index1 == soundTowerIndex) {
 					if (canPlaySound) {
 						ALuint source = getSoundSource();
 						alSourcei(source, AL_BUFFER, sound);
@@ -317,33 +320,32 @@ namespace octet {
 	
 	//possibly not use
 
-	//void stick_cleanup() {
-	//	for (unsigned int i = 0; i < sticks.size(); ++i) {
-	//		if (sticks[i].get_timer() > 1/*150*/) {
-	//			app_scene->delete_mesh_instance(sticks[i].getp_mesh_instance());
-	//			sticks[i] = sticks[sticks.size() - 1];
-	//			sticks.resize(sticks.size() - 1);
-	//		}
-	//	}
-	//}
+	void CleanupSticks() {
+		for (unsigned int i = 0; i < sticks.size(); ++i) {
+			if (sticks[i].get_timer() > 1/*150*/) {
+				app_scene->delete_mesh_instance(sticks[i].getp_mesh_instance());
+				sticks[i] = sticks[sticks.size() - 1];
+				sticks.resize(sticks.size() - 1);
+			}
+		}
+	}
 
 	//rename
-	void shoot() {
+	void ShootSticks() {
 		mat4t mtw;
 		mtw.translate(main_camera->get_node()->get_position());
 		stick s = stick(app_scene->add_shape(mtw, new mesh_box(vec3(0.2f, 0.2f, 6.0f)), green, true, 0.01f));
-	   vec3 fwd = -main_camera->get_node()->get_z();
+	    vec3 fwd = -main_camera->get_node()->get_z();
 		s.get_mesh_instance().get_node()->apply_central_force(fwd*30.0f);
 		sticks.push_back(s);
-		/*stick_cleanup();*/
-		//shoot_reset();
+		CleanupSticks();	
 	}
 
 	void InputManager() {
 
-		//shoot
+		//Shoot Sticks
 		if (is_key_going_down(key_f1)) {
-			shoot();
+			ShootSticks();
 		}
 
 		//Zoom in
@@ -386,7 +388,7 @@ namespace octet {
 		}
 
 		//TEST SOUND CHECK
-		if (is_key_down(key_mmb)) {
+		if (is_key_down(key_lmb)) {
 		 ALuint source = getSoundSource();
 		 alSourcei(source, AL_BUFFER, sound);
 		 alSourcePlay(source);
@@ -403,17 +405,17 @@ namespace octet {
 	  
 	  InputManager();
 
-	  //stick_cleanup();
+	  CollisionCallbacks();
 
-	 /*check_collisions();*/
-	 CollisionCallbacks();
+	  CleanupSticks();
+	
 
 	  if (++frameCount > 100) {
 		  frameCount = 0;
 		  canPlaySound = true;
 	  }
 
-	  //Let's use move the camera with the mouse
+	  //Lets us move the camera with the mouse
 	  scene_node *camera_node = main_camera->get_node();
 	  mat4t &camera_to_world = camera_node->access_nodeToParent();
 	  moving_mouse_view.update(camera_to_world);
