@@ -35,16 +35,17 @@ The slab.h file includes the slab class, which contains some basic parameters fo
 
 It’s been a rewarding experience to work with the bullet library and learn new tools. It has allowed me to further my knowledge of C++ and Object Oriented Programming. I specifically tried to work more with classes, even thought it may not have been strictly necessary. It could have been improved by adding a python script to as a user interface to directly generate the csv file. Another challeng could have been to use a different sound library such as Fmod. 
 
-Credits
+**Credits**
 Mircea Catana, for helping with the springs implementation.
 
 Elio de Berardinis for helping with collision callbacks.
 
-Video
+**Video**
 
 https://youtu.be/RRi9XSW6qaY
 
-Images
+**Images**
 
+![Alt text](https://github.com/fsoncini/octet/blob/T&M_assignment/octet/assets/toosl_and_middleware/Capture1.JPG?raw=true"Screenshot 1")
 
 
