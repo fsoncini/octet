@@ -48,4 +48,6 @@ https://youtu.be/RRi9XSW6qaY
 
 ![Alt text](https://github.com/fsoncini/octet/blob/T&M_assignment/octet/assets/tools_and_middleware/Capture1.JPG?raw=true"Screenshot 1")
 
+![Alt text](https://github.com/fsoncini/octet/blob/T&M_assignment/octet/assets/tools_and_middleware/Capture2.JPG?raw=true"Screenshot 2")
 
+![Alt text](https://github.com/fsoncini/octet/blob/T&M_assignment/octet/assets/tools_and_middleware/Capture3.JPG?raw=true"Screenshot 3")
