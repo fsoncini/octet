@@ -63,151 +63,139 @@ namespace octet {
 
   class ToolsAndMiddleware : public app {
   private:
-	
-	//constraints
-	const float PI = 3.14159;
-	btDiscreteDynamicsWorld *physicalWorld;
+	  
+	  //constraints
+	  const float PI = 3.14159;
+	  btDiscreteDynamicsWorld *physicalWorld;
 
-    // scene for drawing box
-    ref<visual_scene> app_scene;
+      // scene for drawing box
+      ref<visual_scene> app_scene;
 
-	//camera & fps members
-	mouse_look moving_mouse_view;
-	ref<camera_instance> main_camera;
+	  //camera & fps members
+	  mouse_look moving_mouse_view;
+	  ref<camera_instance> main_camera;
 
-	helper_fps_controller fpsHelper;
-	ref<scene_node> playerNode;
+	  helper_fps_controller fpsHelper;
+	  ref<scene_node> playerNode;
 
-	/* storing all sticks so we can do clean-up*/
-	stick s;
-	dynarray<stick> sticks;
+	  /* storing all sticks so we can do clean-up*/
+	  stick s;
+	  dynarray<stick> sticks;
 
-	// jukebox (plays sound when you hit it)
-	int soundTowerIndex;
-	int playerIndex;	
-	int doorIndex;
+	  // jukebox (plays sound when you hit it)
+	  int soundTowerIndex;
+	  int playerIndex;	
+	  int doorIndex;
 
-	//materials
-	material *red;
-	material *green;
-	material *blue;
-	material *pink;
-	material *black;
+	  //materials
+	  material *red;
+	  material *green;
+	  material *blue;
+	  material *pink;
+	  material *black;
 
-	ALuint sound;
-	unsigned int soundSource;
-	unsigned int numSoundSources = 32;
-	ALuint sources[32];
-	bool canPlaySound;
+	  ALuint sound;
+	  unsigned int soundSource;
+	  unsigned int numSoundSources = 32;
+	  ALuint sources[32];
+	  bool canPlaySound;
 
-	int frameCount = 0;
+	  int frameCount = 0;
 
-	//terrain 
-	struct terrain_mesh_source : mesh_terrain::geometry_source {
-		mesh::vertex vertex(vec3_in bb_min, vec3_in uv_min, vec3_in uv_delta, vec3_in pos) {
-			vec3 p = bb_min + pos;
-			vec3 uv = uv_min + vec3((float)pos.x(), (float)pos.z(), 0) * uv_delta;
-			return mesh::vertex(p, vec3(0, 1, 0), uv);
+	  //terrain 
+	  struct terrain_mesh_source : mesh_terrain::geometry_source { mesh::vertex vertex(vec3_in bb_min, vec3_in uv_min, vec3_in uv_delta, vec3_in pos) {
+		  vec3 p = bb_min + pos; vec3 uv = uv_min + vec3((float)pos.x(), (float)pos.z(), 0) * uv_delta;
+		  return mesh::vertex(p, vec3(0, 1, 0), uv);
 		}
-	};
+	  };
 	terrain_mesh_source terrain_source;
 
 	//create instance of ReadCsv class (to read data from csv)
 	ReadCsv rcsv;
 
-  public:
-    /// this is called when we construct the class before everything is initialised.
+    public:
+    
+	// this is called when we construct the class before everything is initialised.
     ToolsAndMiddleware(int argc, char **argv) : app(argc, argv) {
-	
     }
 
     /// this is called once OpenGL is initialized
     void app_init() {
-      app_scene =  new visual_scene();
-      app_scene->create_default_camera_and_lights();
-	  app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.0f, 1.0f));
+		app_scene =  new visual_scene();
+        app_scene->create_default_camera_and_lights();
+	    app_scene->get_camera_instance(0)->get_node()->translate(vec3(0.0f, 0.0f, 1.0f));
 	  
-	  physicalWorld = app_scene->get_bt_world(); //method added in visual_scene.h
+	    physicalWorld = app_scene->get_bt_world(); //method added in visual_scene.h
 
-	  moving_mouse_view.init(this, 200.0f / 360, false);
-	  fpsHelper.init(this);
+	    moving_mouse_view.init(this, 200.0f / 360, false);
+	    fpsHelper.init(this);
 
-	  main_camera = app_scene->get_camera_instance(0);
-	  main_camera->get_node()->translate(vec3(0, 4, 0));
-	  main_camera->set_far_plane(10000);
+	    main_camera = app_scene->get_camera_instance(0);
+	    main_camera->get_node()->translate(vec3(0, 4, 0));
+	    main_camera->set_far_plane(10000);
 
-	  //Initialize materials
-	  red = new material(vec4(1, 0, 0, 1));
-	  green = new material(vec4(0, 1, 0, 1));
-	  blue = new material(vec4(0, 0, 1, 1));
-	  pink = new material(vec4(255, 1, 255, 1));
-	  black = new material(vec4(0, 0, 0, 1));
+	    //Initialize materials
+	    red = new material(vec4(1, 0, 0, 1));
+	    green = new material(vec4(0, 1, 0, 1));
+	    blue = new material(vec4(0, 0, 1, 1));
+	    pink = new material(vec4(255, 1, 255, 1));
+	    black = new material(vec4(0, 0, 0, 1));
 
-
-	  //Create and add terrain background
-	  mat4t mat;
-	  mat.loadIdentity();
-	  mesh_instance *mi = app_scene->add_shape( mat, new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source),
-		  pink, false, 0);
-	  btRigidBody *rb = mi->get_node()->get_rigid_body();	  
+	    //Create and add terrain background
+	    mat4t mat;
+	    mat.loadIdentity();
+	    mesh_instance *mi = app_scene->add_shape( mat, new mesh_terrain(vec3(100.0f, 0.5f, 100.0f), ivec3(100, 1, 100), terrain_source), pink, false, 0);
+	    btRigidBody *rb = mi->get_node()->get_rigid_body();	  
  
-	  //Read csv file
-	  rcsv.ReadFile();
+	    //Read csv file
+	    rcsv.ReadFile();
 
-	  //Create door. Used as a different sample for hinges and sound.
+	    //Create door. Used as a different sample for hinges and sound.
 	  
-	  //Create door jamb
-	  mat.loadIdentity();
-	  mat.translate(vec3(-15.0f, 1.0f, 0.0f));
-	  mesh_instance *k1 = app_scene->add_shape(mat, new mesh_box(vec3(0.2f, 4.0f, 0.2f)), blue, false);
+	    //Create door jamb
+	    mat.loadIdentity();
+	    mat.translate(vec3(-15.0f, 1.0f, 0.0f));
+	    mesh_instance *k1 = app_scene->add_shape(mat, new mesh_box(vec3(0.2f, 4.0f, 0.2f)), blue, false);
 	  
-	  //Create door
-	  mat.loadIdentity();
-	  mat.translate(vec3(-14.8f, 1.0f, 0.0f));
-	  mesh_instance *door = app_scene->add_shape(mat, new mesh_box(vec3(1.0f, 4.0f, 0.2f)), black, true);
-	  doorIndex = door->get_node()->get_rigid_body()->getUserIndex();
+	    //Create door
+	    mat.loadIdentity();
+	    mat.translate(vec3(-14.8f, 1.0f, 0.0f));
+	    mesh_instance *door = app_scene->add_shape(mat, new mesh_box(vec3(1.0f, 4.0f, 0.2f)), black, true);
+	    doorIndex = door->get_node()->get_rigid_body()->getUserIndex();
 
-	  //Create hinge between jamb and door
-	  btHingeConstraint *d = new btHingeConstraint(*(k1->get_node()->get_rigid_body()), *(door->get_node()->get_rigid_body()),
-		  btVector3(0.1f, 2.0f, 0.2f), btVector3(-0.5f, 2.0f, 0.2f),
-		  btVector3(0, 2, 0), btVector3(0, 2, 0), false);
-	  d->setLimit(-PI * 0.1f, PI* 0.1f);
-	  physicalWorld->addConstraint(d);
+	    //Create hinge between jamb and door
+	    btHingeConstraint *d = new btHingeConstraint(*(k1->get_node()->get_rigid_body()), *(door->get_node()->get_rigid_body()),
+		btVector3(0.1f, 2.0f, 0.2f), btVector3(-0.5f, 2.0f, 0.2f),
+		btVector3(0, 2, 0), btVector3(0, 2, 0), false);
+	    d->setLimit(-PI * 0.1f, PI* 0.1f);
+	    physicalWorld->addConstraint(d);
 	  
-	  //Declare dimensions for player fps pov
-	  float player_height = 1.8f;
-	  float player_radius = 0.25f;
-	  float player_mass = 90.0f;
+	    //Declare dimensions for player fps pov
+	    float player_height = 1.8f;
+	    float player_radius = 0.25f;
+	    float player_mass = 90.0f;
 
-	  //Player 
-	  mat.loadIdentity();
-	  mat.translate(0.0f, player_height*6.0f, 50.0f);
-	  mesh_instance *playerInstance = app_scene->add_shape(
-		  mat,
-		  new mesh_sphere(vec3(0), player_radius),
-		  new material(vec4(1, 0, 0, 1)),
-		  true, player_mass,
-		  new btCapsuleShape(0.25f, player_height)
-	  );
-	  playerNode = playerInstance->get_node();
-	  playerIndex = playerNode->get_rigid_body()->getUserIndex();
+	    //Player 
+	    mat.loadIdentity();
+	    mat.translate(0.0f, player_height*6.0f, 50.0f);
+	    mesh_instance *playerInstance = app_scene->add_shape( mat, new mesh_sphere(vec3(0), player_radius), new material(vec4(1, 0, 0, 1)), true, player_mass, new btCapsuleShape(0.25f, player_height));
+	    playerNode = playerInstance->get_node();
+	    playerIndex = playerNode->get_rigid_body()->getUserIndex();
 
-	  //Call functions to create springs and bridge
-	  MakeSprings();
-	  MakeBridge();
+	    //Call functions to create springs and bridge
+	    MakeSprings();
+	    MakeBridge();
 
-	  //Create Tower for SOUND and COLLISION purpose 
-	  mat.loadIdentity();
-	  mat.translate(vec3(30, 1, 0));
-	  mesh_instance *soundTower = app_scene->add_shape(mat, new mesh_box(vec3(2,12,2)),
-		  blue, false);
-	  soundTowerIndex = soundTower->get_node()->get_rigid_body()->getUserIndex();
+	    //Create Tower for SOUND and COLLISION purpose 
+	    mat.loadIdentity();
+	    mat.translate(vec3(30, 1, 0));
+	    mesh_instance *soundTower = app_scene->add_shape(mat, new mesh_box(vec3(2,12,2)), blue, false);
+	    soundTowerIndex = soundTower->get_node()->get_rigid_body()->getUserIndex();
 
-	  sound = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
-	  soundSource = 0;
-	  alGenSources(numSoundSources, sources);
-	  canPlaySound = true;
-
+	    sound = resource_dict::get_sound_handle(AL_FORMAT_MONO16, "assets/invaderers/bang.wav");
+	    soundSource = 0;
+	    alGenSources(numSoundSources, sources);
+	    canPlaySound = true;
     }
 	
 	ALuint getSoundSource() {
@@ -330,7 +318,7 @@ namespace octet {
 		}
 	}
 
-	//rename
+	//Shoot Sticks to hit Tower and produce sounds
 	void ShootSticks() {
 		mat4t mtw;
 		mtw.translate(main_camera->get_node()->get_position());
@@ -399,20 +387,19 @@ namespace octet {
 
 	/// this is called to draw the world
     void draw_world(int x, int y, int w, int h) {
-      int vx = 0, vy = 0;
-      get_viewport_size(vx, vy);
-      app_scene->begin_render(vx, vy);
+		int vx = 0, vy = 0;
+        get_viewport_size(vx, vy);
+        app_scene->begin_render(vx, vy);
 	  
-	  InputManager();
+	    InputManager();
 
-	  CollisionCallbacks();
+	    CollisionCallbacks();
 
-	  CleanupSticks();
-	
-
-	  if (++frameCount > 100) {
-		  frameCount = 0;
-		  canPlaySound = true;
+	    CleanupSticks();
+		
+		if (++frameCount > 100) {
+			frameCount = 0;
+		    canPlaySound = true;
 	  }
 
 	  //Lets us move the camera with the mouse
